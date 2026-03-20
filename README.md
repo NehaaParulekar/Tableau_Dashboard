@@ -6,7 +6,7 @@ An **interactive, self-contained** analytics dashboard for the Netflix Movies & 
 
 ## 🚀 Live Demo
 
-> **GitHub Pages:** `https://NehaaParulekar.github.io/Tableau-_dashboard/netflix_dashboard.html`
+> **GitHub Pages:** `https://NehaaParulekar.github.io/Tableau-dashboard/netflix_dashboard.html`
 ---
 
 ## ✨ Features
