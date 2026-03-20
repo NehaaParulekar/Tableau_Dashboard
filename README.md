@@ -3,7 +3,7 @@
 # Netflix Content Analytics Dashboard
 
 **A fully interactive, self-contained analytics dashboard built from 8,807 Netflix titles.**
-Cross-filter across 10 charts simultaneously — no server, no install, opens in any browser.
+
 
 <br/>
 
