@@ -1,4 +1,5 @@
-[README-2.md](https://github.com/user-attachments/files/26147372/README-2.md)
+[README-2.md](https://github.com/user-attachments/files/26147578/README-2.md)
+<div align="center">
 
 # Netflix Content Analytics Dashboard
 
@@ -9,13 +10,11 @@
 
 [![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-View%20Dashboard-E50914?style=for-the-badge)](https://NehaaParulekar.github.io/Tableau_Dashboard/netflix_dashboard.html)
 
-<br/>
-
 </div>
 
 ---
 
-## 📌 Overview
+ ## 📌 Overview 
 
 This dashboard lets you explore the entire Netflix library interactively. Click any bar, donut slice, heatmap cell, or table row — every other chart updates instantly from real data. No approximations, no page reloads.
 
