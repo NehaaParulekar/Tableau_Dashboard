@@ -6,9 +6,7 @@ An **interactive, self-contained** analytics dashboard for the Netflix Movies & 
 
 ## 🚀 Live Demo
 
-> **GitHub Pages:** `https://YOUR_USERNAME.github.io/netflix-dashboard/netflix_dashboard.html`
-> *(Enable: Settings → Pages → Source: `main` branch → `/root`)*
-
+> **GitHub Pages:** `https://NehaaParulekar.github.io/Tableau-_daqshboard/netflix_dashboard.html`
 ---
 
 ## ✨ Features
@@ -27,26 +25,6 @@ An **interactive, self-contained** analytics dashboard for the Netflix Movies & 
 | Movie Runtime Breakdown | Donut | 5 runtime buckets |
 | TV Show Seasons | Bar | Season distribution |
 
-### Cross-Filter Engine
-- Click **any chart** → all others update from real 8,807-record dataset
-- **Toggle** — click same element again to deselect
-- **Stack multiple filters** across charts simultaneously
-- **Active filter tags** — click `×` to remove individual filters
-- **"Clear filters"** button resets everything at once
-
-### UX Improvements Over v1
-- ✅ Trend chart click is now **wired** (was broken in v1)
-- ✅ `chart.update()` used instead of destroy+recreate — **no more flash**
-- ✅ Genre bar shows **Movie vs TV Show split** in each bar
-- ✅ **YoY Growth Rate** chart added (was missing)
-- ✅ **Bubble/Scatter** chart: duration vs release year
-- ✅ **Heatmap**: monthly content additions 2015–2021
-- ✅ **2019 peak annotation** on trend chart
-- ✅ **Change summary bar** — "Showing X of 8,807 filtered out"
-- ✅ **Export CSV** of currently filtered data
-- ✅ **Mobile responsive** (collapses below 900px)
-- ✅ Sidebar and chart click filters stay **in sync**
-
 ---
 
 ## 📊 Key Insights
@@ -61,47 +39,6 @@ An **interactive, self-contained** analytics dashboard for the Netflix Movies & 
 | 🌏 India is #2 | 1,046+ titles |
 | ⏱ Sweet spot: 90–120 min | Most common movie runtime |
 | 📺 Most shows: 1 season | 1,793 of 2,676 TV shows |
-
----
-
-## 🗂️ Repository Structure
-
-```
-netflix-dashboard/
-├── netflix_dashboard.html   ← Open this in any browser
-├── netflix.csv              ← Source dataset
-├── README.md                ← This file
-├── .gitignore
-└── LICENSE
-```
-
----
-
-## 🚀 Getting Started
-
-### Run Locally
-```bash
-git clone https://github.com/YOUR_USERNAME/netflix-dashboard.git
-cd netflix-dashboard
-open netflix_dashboard.html        # macOS
-start netflix_dashboard.html       # Windows
-xdg-open netflix_dashboard.html   # Linux
-```
-
-### Push to GitHub
-```bash
-git init
-git add .
-git commit -m "feat: Netflix analytics dashboard with cross-filtering"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/netflix-dashboard.git
-git push -u origin main
-```
-
-### Enable GitHub Pages
-1. Go to **Settings → Pages**
-2. Source: `main` branch → `/ (root)` → **Save**
-3. Live at: `https://YOUR_USERNAME.github.io/netflix-dashboard/netflix_dashboard.html`
 
 ---
 
