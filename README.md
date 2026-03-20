@@ -1,6 +1,6 @@
 # 🎬 Netflix Content Analytics Dashboard
 
-An **interactive, self-contained** analytics dashboard for the Netflix Movies & TV Shows dataset. Every chart is cross-filterable — click any bar, slice, row, or heatmap cell and every other chart updates instantly. No server, no install. Just open the HTML file.
+An **interactive, self-contained** analytics dashboard for the Netflix Movies & TV Shows dataset. Every chart is cross-filterable — click any bar, slice, row, or heatmap cell and every other chart updates instantly.
 
 ---
 
