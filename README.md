@@ -1,8 +1,6 @@
 <div align="center">
 
 <img src="https://img.shields.io/badge/Dashboards-2-1C1917?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Zero-Dependencies-4338CA?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Open_in-Browser-22A06B?style=for-the-badge" />
 
 <br/><br/>
 
