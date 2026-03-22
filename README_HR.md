@@ -1,12 +1,4 @@
 <div align="center">
-
-<img src="https://img.shields.io/badge/HR%20Analytics-Dashboard-1A1714?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Pure%20SVG-Zero%20CDN-2D5F8A?style=for-the-badge" />
-<img src="https://img.shields.io/badge/311%20Employees-Embedded-2E7D52?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Open%20Instantly-No%20Install-8A6020?style=for-the-badge" />
-
-<br/><br/>
-
 # HR Analytics Dashboard
 
 **Fully interactive HR analytics dashboard — 20 cross-filterable charts, 8 KPI cards, zero external dependencies.**
