@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HR Analytics Dashboard</title>
+<style>
+:root{
+  /* Background — warm cream, not harsh white */
+  --bg:#F5F2EE;--surface:#FFFFFF;--s2:#EDE9E3;--s3:#E0DBD3;
+  --border:#D4CFC7;--border2:#B8B0A5;
+  /* Text */
+  --ink:#1A1714;--ink2:#3C3630;--muted:#6B635A;--dim:#9E9690;--dimmer:#C4BCB4;
+  /* Single accent colour — deep slate blue, professional */
+  --accent:#2D5F8A;--accent2:#1E4A6E;--accent-l:#EBF3FA;
+  /* Semantic colours — muted, not neon */
+  --green:#2E7D52;--green-l:#EAF4EE;
+  --red:#B33A3A;--red-l:#FAEAEA;
+  --amber:#8A6020;--amber-l:#FBF4E6;
+  --sel-bg:rgba(45,95,138,.07);--sel-br:rgba(45,95,138,.3);
+  --sh:0 1px 3px rgba(26,23,20,.07),0 1px 2px rgba(26,23,20,.04);
+  --sh-md:0 4px 14px rgba(26,23,20,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:13px;line-height:1.5;min-height:100vh}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:#1A1714;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:18px;transition:opacity .4s}
+.ll{font-family:Georgia,serif;font-size:46px;color:#fff;letter-spacing:-.5px}
+.ll em{color:#7EB3D8;font-style:normal}
+.lp{color:rgba(255,255,255,.35);font-size:12px;letter-spacing:.3px}
+.spin{width:26px;height:26px;border:2px solid rgba(255,255,255,.15);border-top-color:#7EB3D8;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* HEADER */
+.hdr{background:#1A1714;padding:0 22px;display:flex;align-items:center;gap:14px;height:54px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.logo{font-family:Georgia,serif;font-size:20px;color:#fff;flex-shrink:0}
+.logo em{color:#7EB3D8;font-style:normal}
+.hdiv{width:1px;height:26px;background:rgba(255,255,255,.1);flex-shrink:0}
+.hfile{font-size:11px;color:rgba(255,255,255,.3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hstats{display:flex;gap:14px;flex-shrink:0}
+.hst .v{font-size:15px;font-weight:600;line-height:1;color:#fff}
+.hst .l{font-size:9px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1px}
+.hbtns{display:flex;gap:7px;flex-shrink:0}
+.hbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.72);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s}
+.hbtn:hover{background:rgba(255,255,255,.16);color:#fff}
+.hbtn.r{border-color:rgba(179,58,58,.5);color:rgba(248,113,113,.9)}
+.hbtn.r:hover{background:rgba(179,58,58,.15)}
+
+/* LAYOUT */
+.app{display:flex;min-height:calc(100vh - 54px)}
+.main{flex:1;padding:18px 18px 50px;overflow-x:hidden;min-width:0}
+
+/* SIDEBAR */
+.sb{width:238px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);padding:15px 12px;overflow-y:auto;height:calc(100vh - 54px);position:sticky;top:54px}
+.sb::-webkit-scrollbar{width:4px}
+.sb::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.sb-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid var(--border)}
+.sb-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.sbr{font-size:11px;color:var(--accent);cursor:pointer;font-weight:500;background:none;border:none}
+.sbr:hover{text-decoration:underline}
+.fg{margin-bottom:12px}
+.fl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;display:block}
+.fsel{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:7px 26px 7px 9px;color:var(--ink);font-size:12px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239E9690' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;transition:border .15s}
+.fsel:hover,.fsel:focus{border-color:var(--accent)}
+.fins{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:7px 9px;color:var(--ink);font-size:12px;outline:none;transition:border .15s}
+.fins:focus{border-color:var(--accent)}
+.rng-g{display:flex;flex-direction:column;gap:8px}
+.rng-r{display:flex;align-items:center;gap:8px}
+.rng-l{font-size:11px;color:var(--dim);width:24px;flex-shrink:0}
+input[type=range]{-webkit-appearance:none;flex:1;height:3px;background:var(--border2);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
+.rng-v{font-size:11px;color:var(--muted);width:36px;text-align:right;flex-shrink:0}
+.atsec{margin-top:12px;padding-top:11px;border-top:1px solid var(--border);display:none}
+.at-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:7px}
+.atgs{display:flex;flex-wrap:wrap;gap:4px}
+.atg{display:inline-flex;align-items:center;gap:4px;background:var(--sel-bg);border:1px solid var(--sel-br);border-radius:10px;padding:3px 9px;font-size:11px;color:var(--accent2);cursor:pointer;transition:all .15s}
+.atg:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* KPI */
+.krow{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px 12px;box-shadow:var(--sh);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--sh-md)}
+.kpi-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:11px 11px 0 0}
+.ki{font-size:17px;margin-bottom:6px;display:block}
+.kv{font-family:Georgia,serif;font-size:22px;color:var(--ink);line-height:1;margin-bottom:3px}
+.kl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.ks{font-size:11px;color:var(--dim);margin-top:2px}
+
+/* INSIGHT BAR */
+.ibar{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:11px;padding:10px 15px;display:flex;gap:20px;flex-wrap:wrap;margin-bottom:13px;box-shadow:var(--sh)}
+.ins{display:flex;flex-direction:column;gap:2px}
+.insl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-weight:700}
+.insv{font-size:12px;font-weight:600;color:var(--ink)}
+.insv em{color:var(--accent);font-style:normal}
+
+/* ALERTS */
+.abar{border-radius:9px;padding:9px 14px;margin-bottom:12px;font-size:12px;display:none;align-items:center;gap:9px;font-weight:500}
+.abar.on{display:flex}
+.a-cr{background:var(--red-l);border:1px solid rgba(179,58,58,.2);color:#8A2020}
+.a-fi{background:var(--accent-l);border:1px solid rgba(45,95,138,.2);color:var(--accent2)}
+
+/* SECTION HEADERS */
+.shdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--dim);margin:20px 0 11px;display:flex;align-items:center;gap:10px}
+.shdr::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.g1{display:grid;grid-template-columns:1fr;margin-bottom:12px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:15px;box-shadow:var(--sh);position:relative;transition:border-color .18s,box-shadow .18s}
+.card.cl{cursor:pointer}
+.card.cl:hover{border-color:var(--border2);box-shadow:var(--sh-md)}
+.card.sel{border-color:var(--sel-br)!important;box-shadow:0 0 0 1px var(--sel-br),var(--sh-md)!important}
+.ct{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
+.cs{font-size:11px;color:var(--dim);margin-top:2px;margin-bottom:12px}
+.hint{position:absolute;top:13px;right:13px;font-size:10px;color:var(--dimmer);text-transform:uppercase;letter-spacing:.4px;pointer-events:none}
+.card.sel .hint{color:var(--accent)}
+
+/* CHART WRAPPERS */
+.cw{position:relative;width:100%}
+.cw svg{display:block;width:100%;height:100%}
+.empty-st{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--surface);border-radius:6px;pointer-events:none}
+.empty-st.on{display:flex}
+.e-ico{font-size:22px;opacity:.2}
+.e-txt{font-size:12px;color:var(--dim)}
+
+/* TABLE */
+.tbl-ctrl{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.tsearch{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--ink);font-size:12px;outline:none;transition:border .15s}
+.tsearch:focus{border-color:var(--accent)}
+.tcnt{font-size:12px;color:var(--dim);flex-shrink:0}
+.twrap{overflow-x:auto;max-height:280px;overflow-y:auto;border-radius:8px;border:1px solid var(--border)}
+.dtbl{width:100%;border-collapse:collapse;font-size:12px}
+.dtbl thead th{text-align:left;padding:8px 11px;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);font-weight:700;background:var(--s2);position:sticky;top:0;cursor:pointer;user-select:none;white-space:nowrap}
+.dtbl thead th:hover{color:var(--accent)}
+.dtbl td{padding:7px 11px;border-bottom:1px solid var(--border);color:var(--ink2);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.dtbl tbody tr:last-child td{border-bottom:none}
+.dtbl tbody tr:hover td{background:var(--s2)}
+.tfoot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;color:var(--dim)}
+.lmbtn{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:5px 14px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .15s}
+.lmbtn:hover{border-color:var(--accent);color:var(--accent)}
+.bdg{display:inline-block;padding:2px 8px;border-radius:9px;font-size:10px;font-weight:700}
+.b-act{background:var(--green-l);color:#1A5C38}
+.b-vol{background:var(--amber-l);color:#6B4A10}
+.b-cau{background:var(--red-l);color:#8A2020}
+.b-ex{background:var(--green-l);color:#1A5C38}
+.b-fm{background:var(--accent-l);color:var(--accent2)}
+.b-ni{background:var(--amber-l);color:#6B4A10}
+.b-pip{background:var(--red-l);color:#8A2020}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+@media(max-width:1100px){.sb{display:none}.krow{grid-template-columns:repeat(4,1fr)}.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+@media print{.sb,.hbtns{display:none}.main{padding:0}.card{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="ll">HR <em>Analytics</em></div>
+  <div class="spin"></div>
+  <div class="lp">311 employees · 20 charts · zero dependencies</div>
+</div>
+
+<div class="hdr">
+  <div class="logo">HR <em>Analytics</em></div>
+  <div class="hdiv"></div>
+  <div class="hfile">HRDataset_v14 · 311 employees · 20 charts · zero dependencies</div>
+  <div class="hstats">
+    <div class="hst"><div class="v" id="hTo">311</div><div class="l">Total</div></div>
+    <div class="hst"><div class="v" id="hAc">207</div><div class="l">Active</div></div>
+    <div class="hst"><div class="v" id="hAt" style="color:#FCA5A5">33.4%</div><div class="l">Attrition</div></div>
+  </div>
+  <div class="hdiv"></div>
+  <div class="hbtns">
+    <button class="hbtn" onclick="window.print()">🖨 Print</button>
+    <button class="hbtn" onclick="doExport()">⬇ CSV</button>
+    <button class="hbtn r" onclick="doReset()">↺ Reset</button>
+  </div>
+</div>
+
+<div class="app">
+<div class="main">
+  <div class="krow" id="krow"></div>
+  <div class="ibar" id="ibar"></div>
+  <div class="abar a-cr" id="abCr"><span>🚨</span><span id="abCrT"></span></div>
+  <div class="abar a-fi" id="abFi"><span>🔍</span><span id="abFiT"></span></div>
+
+  <div class="shdr">Workforce Overview</div>
+  <div class="g4">
+    <div class="card cl" id="cd-dept">
+      <div class="ct">By Department</div><div class="cs">Click bar to filter</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-dept" data-filter="dept" style="height:190px"><div class="empty-st" id="em-dept"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card cl" id="cd-status">
+      <div class="ct">Employment Status</div><div class="cs">Click slice to filter</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-status" data-filter="status" style="height:190px"><div class="empty-st" id="em-status"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card cl" id="cd-gender">
+      <div class="ct">Gender Split</div><div class="cs">Click cell to filter</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-gender" data-filter="sex" style="height:190px"><div class="empty-st" id="em-gender"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card cl" id="cd-perf">
+      <div class="ct">Performance Score</div><div class="cs">Click bar to filter</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-perf" data-filter="perf" style="height:190px"><div class="empty-st" id="em-perf"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+  </div>
+
+  <div class="shdr">Retention &amp; Attrition</div>
+  <div class="g3">
+    <div class="card">
+      <div class="ct">Attrition by Department</div><div class="cs">Red ≥35% · Amber ≥25% · dashed = company avg</div>
+      <div class="cw" id="cw-attrDept" style="height:210px"><div class="empty-st" id="em-attrDept"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card cl" id="cd-mgr">
+      <div class="ct">Manager Attrition — Lollipop</div><div class="cs">Click to filter by manager's team</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-mgr" data-filter="manager" style="height:210px"><div class="empty-st" id="em-mgr"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card cl" id="cd-term">
+      <div class="ct">Why Employees Left</div><div class="cs">Click bar to filter</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-term" data-filter="termreason" style="height:210px"><div class="empty-st" id="em-term"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+  </div>
+
+  <div class="shdr">Compensation &amp; Engagement</div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Salary vs Engagement — Scatter</div><div class="cs">Each dot = 1 employee · does pay drive engagement?</div>
+      <div class="cw" id="cw-scatter" style="height:215px"><div class="empty-st" id="em-scatter"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card">
+      <div class="ct">Avg Salary by Department</div><div class="cs">IT/IS earns 62% more than Production</div>
+      <div class="cw" id="cw-salDept" style="height:215px"><div class="empty-st" id="em-salDept"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">Engagement Score — Dot Plot</div><div class="cs">Dot = dept avg · line = company avg (4.12)</div>
+      <div class="cw" id="cw-eng" style="height:195px"><div class="empty-st" id="em-eng"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card">
+      <div class="ct">Avg Tenure by Department</div><div class="cs">Sales retains longest at 8.7 years</div>
+      <div class="cw" id="cw-tenure" style="height:195px"><div class="empty-st" id="em-tenure"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+  </div>
+
+  <div class="shdr">Behaviour &amp; Pipeline</div>
+  <div class="g3">
+    <div class="card">
+      <div class="ct">Days Late by Performance</div><div class="cs">PIP: 4.31 days late · Exceeds: 0.00 — key discipline signal</div>
+      <div class="cw" id="cw-late" style="height:195px"><div class="empty-st" id="em-late"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card">
+      <div class="ct">Absences by Department</div><div class="cs">Sales highest at 11.5 days — disengagement signal</div>
+      <div class="cw" id="cw-abs" style="height:195px"><div class="empty-st" id="em-abs"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card">
+      <div class="ct">Special Projects by Department</div><div class="cs">IT/IS leads at 5.9 avg — beyond-role contribution</div>
+      <div class="cw" id="cw-proj" style="height:195px"><div class="empty-st" id="em-proj"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card cl" id="cd-source">
+      <div class="ct">Recruitment Source</div><div class="cs">Click bar to filter by channel</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-source" data-filter="source" style="height:195px"><div class="empty-st" id="em-source"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card cl" id="cd-race">
+      <div class="ct">Race / Ethnicity</div><div class="cs">Click slice to filter</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-race" data-filter="race" style="height:195px"><div class="empty-st" id="em-race"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card">
+      <div class="ct">Hiring Trend by Year</div><div class="cs">New hires per year · 2011 peak: 83 hires</div>
+      <div class="cw" id="cw-hire" style="height:195px"><div class="empty-st" id="em-hire"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card">
+      <div class="ct">Salary Distribution</div><div class="cs">Histogram · updates with active filters</div>
+      <div class="cw" id="cw-salH" style="height:185px"><div class="empty-st" id="em-salH"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card cl" id="cd-sat">
+      <div class="ct">Satisfaction — Stacked Bar</div><div class="cs">Click colour band to filter by score</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-sat" data-filter="sat" style="height:185px"><div class="empty-st" id="em-sat"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+    <div class="card cl" id="cd-pos">
+      <div class="ct">Top Positions</div><div class="cs">Click bar to filter by role</div><div class="hint">CLICK</div>
+      <div class="cw" id="cw-pos" data-filter="position" style="height:185px"><div class="empty-st" id="em-pos"><div class="e-ico">📊</div><div class="e-txt">No data</div></div></div>
+    </div>
+  </div>
+
+  <div class="shdr">Employee Records</div>
+  <div class="card g1">
+    <div class="tbl-ctrl">
+      <input class="tsearch" id="tSearch" type="text" placeholder="Search by name…" oninput="renderTbl()">
+      <span class="tcnt" id="tCnt"></span>
+    </div>
+    <div class="twrap"><table class="dtbl">
+      <thead><tr>
+        <th onclick="tSort('name')">Name ↕</th><th onclick="tSort('dept')">Department ↕</th>
+        <th onclick="tSort('position')">Position ↕</th><th onclick="tSort('status')">Status ↕</th>
+        <th onclick="tSort('perf')">Performance ↕</th><th onclick="tSort('salary')">Salary ↕</th>
+        <th onclick="tSort('engagement')">Engagement ↕</th><th onclick="tSort('tenure')">Tenure ↕</th>
+        <th onclick="tSort('absences')">Absences ↕</th><th onclick="tSort('manager')">Manager ↕</th>
+      </tr></thead>
+      <tbody id="tBody"></tbody>
+    </table></div>
+    <div class="tfoot"><span id="tFoot"></span><button class="lmbtn" id="tMore" onclick="tLoadMore()" style="display:none">Load more ↓</button></div>
+  </div>
+</div>
+
+<aside class="sb">
+  <div class="sb-h"><span class="sb-t">Filters</span><button class="sbr" onclick="doReset()">Reset all</button></div>
+  <div class="fg"><span class="fl">Search Name</span><input class="fins" id="f-name" type="text" placeholder="Employee name…" oninput="sbChange()"></div>
+  <div class="fg"><span class="fl">Department</span>
+    <select class="fsel" id="f-dept" onchange="sbChange()"><option value="">All Departments</option>
+      <option>Production</option><option>IT/IS</option><option>Sales</option>
+      <option>Software Engineering</option><option>Admin Offices</option><option>Executive Office</option></select></div>
+  <div class="fg"><span class="fl">Employment Status</span>
+    <select class="fsel" id="f-status" onchange="sbChange()"><option value="">All Statuses</option>
+      <option>Active</option><option>Voluntarily Terminated</option><option>Terminated for Cause</option></select></div>
+  <div class="fg"><span class="fl">Performance Score</span>
+    <select class="fsel" id="f-perf" onchange="sbChange()"><option value="">All</option>
+      <option>Exceeds</option><option>Fully Meets</option><option>Needs Improvement</option><option>PIP</option></select></div>
+  <div class="fg"><span class="fl">Gender</span>
+    <select class="fsel" id="f-sex" onchange="sbChange()"><option value="">All</option>
+      <option value="F">Female</option><option value="M">Male</option></select></div>
+  <div class="fg"><span class="fl">Recruitment Source</span>
+    <select class="fsel" id="f-source" onchange="sbChange()"><option value="">All Sources</option>
+      <option>Indeed</option><option>LinkedIn</option><option>Google Search</option>
+      <option>Employee Referral</option><option>Diversity Job Fair</option>
+      <option>CareerBuilder</option><option>Website</option></select></div>
+  <div class="fg"><span class="fl">Race / Ethnicity</span>
+    <select class="fsel" id="f-race" onchange="sbChange()"><option value="">All</option>
+      <option>White</option><option>Black or African American</option><option>Asian</option>
+      <option>Two or more races</option><option>American Indian or Alaska Native</option><option>Hispanic</option></select></div>
+  <div class="fg"><span class="fl">Hispanic / Latino</span>
+    <select class="fsel" id="f-hisp" onchange="sbChange()"><option value="">All</option>
+      <option value="Yes">Yes</option><option value="No">No</option></select></div>
+  <div class="fg"><span class="fl">Marital Status</span>
+    <select class="fsel" id="f-marital" onchange="sbChange()"><option value="">All</option>
+      <option>Single</option><option>Married</option><option>Divorced</option>
+      <option>Separated</option><option>Widowed</option></select></div>
+  <div class="fg"><span class="fl">Salary Range</span>
+    <div class="rng-g">
+      <div class="rng-r"><span class="rng-l">Min</span>
+        <input type="range" id="sal-mn" min="45000" max="250000" value="45000" step="1000" oninput="salCh('min',this.value)">
+        <span class="rng-v" id="smv">$45K</span></div>
+      <div class="rng-r"><span class="rng-l">Max</span>
+        <input type="range" id="sal-mx" min="45000" max="250000" value="250000" step="1000" oninput="salCh('max',this.value)">
+        <span class="rng-v" id="sxv">$250K</span></div>
+    </div>
+  </div>
+  <div class="atsec" id="atsec"><div class="at-l">Active Filters</div><div class="atgs" id="atgs"></div></div>
+</aside>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// DATA — compressed 23KB
+// ═══════════════════════════════════
+var _DB = {"D":["Admin Offices","Executive Office","IT/IS","Production","Sales","Software Engineering"],"ST":["Active","Terminated for Cause","Voluntarily Terminated"],"PE":["Exceeds","Fully Meets","Needs Improvement","PIP"],"SE":["F","M"],"RA":["American Indian or Alaska Native","Asian","Black or African American","Hispanic","Two or more races","White"],"SO":["CareerBuilder","Diversity Job Fair","Employee Referral","Google Search","Indeed","LinkedIn","On-line Web application","Other","Website"],"MA":["Divorced","Married","Separated","Single","Widowed"],"HI":["No","Yes","no","yes"],"MG":["Alex Sweetwater","Amy Dunn","Board of Directors","Brandon R. LeBlanc","Brannon Miller","Brian Champaigne","David Stanley","Debra Houlihan","Elijiah Gray","Eric Dougall","Janet King","Jennifer Zamora","John Smith","Kelley Spirea","Ketsia Liebig","Kissy Sullivan","Lynn Daneault","Michael Albert","Peter Monroe","Simon Roup","Webster Butler"],"TR":["Another position","Fatal attraction","Learned that he is a gangster","N/A-StillEmployed","attendance","career change","gross misconduct","hours","maternity leave - did not return","medical issues","military","more money","no-call, no-show","performance","relocation out of area","retiring","return to school","unhappy"],"PO":["Accountant I","Administrative Assistant","Area Sales Manager","BI Developer","BI Director","CIO","Data Analyst","Data Architect","Database Administrator","Director of Operations","Director of Sales","Enterprise Architect","IT Director","IT Manager - DB","IT Manager - Infra","IT Manager - Support","IT Support","Network Engineer","President & CEO","Principal Data Architect","Production Manager","Production Technician I","Production Technician II","Sales Manager","Senior BI Developer","Shared Services Manager","Software Engineer","Software Engineering Manager","Sr. Accountant","Sr. DBA","Sr. Network Engineer"],"R":[["Adinolfi, Wilson  K",3,0,0,1,5,5,3,0,17,3,21,62506,460,5,1,0,0,0,11,115],["Ait Sidi, Karthikeyan",2,2,1,1,5,4,1,0,19,5,29,104437,496,3,17,0,6,1,15,12],["Akinkuolie, Sarah",3,2,1,0,5,5,1,0,15,7,22,64955,302,3,3,0,0,1,11,12],["Alagbe,Trina",3,0,1,0,5,4,1,0,8,3,21,64991,484,5,15,0,0,0,8,150],["Anderson, Carol",3,2,1,0,5,3,0,0,20,16,21,50825,500,4,2,0,0,1,11,52],["Anderson, Linda",3,0,0,0,5,5,3,0,1,3,21,57568,500,5,15,0,0,0,12,110],["Andreola, Colby",5,0,1,0,5,5,3,0,0,3,26,95660,304,3,19,0,4,0,14,81],["Athwal, Sam",3,0,1,1,5,2,4,0,14,3,21,59365,500,4,19,0,0,0,13,93],["Bachiochi, Linda",3,0,1,0,2,1,3,0,4,3,21,47837,446,3,4,0,0,0,9,135],["Bacong, Alejandro",2,0,1,1,5,4,0,0,18,3,16,50178,500,5,16,0,6,0,15,80],["Baczenski, Rachael",3,2,1,0,2,1,1,1,6,0,21,54670,420,4,12,0,0,1,11,60],["Barbara, Thomas",3,2,1,1,2,1,1,1,15,17,21,47211,420,3,15,0,0,1,12,45],["Barbossa, Hector",2,0,0,1,2,1,0,0,19,3,6,92328,428,4,9,0,5,0,14,81],["Barone, Francesco  A",3,0,1,1,4,3,3,0,13,3,21,58709,460,4,7,0,0,0,12,109],["Barton, Nader",3,2,1,1,5,6,0,0,17,0,21,52505,500,5,1,0,0,1,12,45],["Bates, Norman",3,1,1,1,5,3,3,0,13,4,21,57834,500,4,20,0,0,1,11,65],["Beak, Kimberly",3,0,0,0,5,2,1,0,13,3,22,70131,440,3,16,0,0,0,16,65],["Beatrice, Courtney",3,0,1,0,5,3,3,0,8,3,21,59026,500,5,12,0,0,0,11,118],["Becker, Renee",2,1,1,0,5,3,3,1,19,13,8,110000,450,4,8,0,5,1,14,12],["Becker, Scott",3,0,1,1,1,5,3,0,20,3,21,53250,420,4,13,0,0,0,13,95],["Bernstein, Sean",3,0,1,1,5,3,3,1,1,3,21,51044,500,3,13,0,0,0,12,108],["Biden, Lowan  M",3,0,1,0,1,4,0,0,14,3,21,64919,420,3,2,0,0,0,13,94],["Billis, Helen",3,0,0,0,5,4,1,0,4,3,21,62910,500,3,19,0,0,0,14,85],["Blount, Dianna",3,0,2,0,5,0,3,0,17,3,22,66441,200,3,3,2,0,0,11,118],["Bondwell, Betsy",3,2,1,0,5,3,3,0,8,5,22,57815,480,5,5,0,0,1,11,32],["Booth, Frank",2,1,1,1,2,5,3,0,19,2,11,103613,350,5,2,0,7,1,14,20],["Boutwell, Bonalyn",0,0,1,0,2,1,1,0,3,3,28,106367,500,4,4,0,3,0,15,79],["Bozzi, Charles",3,2,1,1,1,4,3,0,10,15,20,74312,339,3,14,0,0,1,13,9],["Brill, Donna",3,2,1,0,5,3,1,0,6,0,21,53492,335,4,6,0,0,1,12,12],["Brown, Mia",0,0,1,0,2,1,1,0,3,3,0,63000,450,2,14,0,6,0,8,142],["Buccheri, Joseph",3,0,1,1,5,3,3,0,20,3,22,65288,319,3,9,0,0,0,14,83],["Bugali, Josephine",3,0,1,0,2,1,2,0,15,3,21,64375,350,5,17,0,0,0,13,91],["Bunbury, Jessica",4,2,1,0,2,3,1,0,12,0,2,74326,314,5,19,1,0,1,11,30],["Burke, Joelle",3,0,1,0,2,2,3,0,1,3,22,63763,451,4,3,0,0,0,12,108],["Burkett, Benjamin",3,0,1,1,5,4,1,0,14,3,22,62162,325,5,15,0,0,0,11,118],["Cady, Max",5,0,1,1,5,3,3,0,11,3,27,77692,384,3,4,0,5,0,11,114],["Candie, Calvin",3,0,0,1,5,4,3,0,10,3,20,72640,500,3,14,0,0,0,16,69],["Carabbio, Judith",5,0,1,0,5,4,3,0,0,3,26,93396,496,4,3,0,6,0,13,91],["Carey, Michael",3,0,1,1,2,5,3,0,13,3,21,52846,443,3,14,0,0,0,14,88],["Carr, Claudia  N",2,0,1,0,2,5,3,0,19,3,29,100031,500,5,7,0,6,0,16,65],["Carter, Michelle",4,0,1,0,5,4,3,0,12,3,2,71860,500,5,7,0,0,0,14,84],["Chace, Beatrice",3,0,1,0,5,3,3,0,17,3,21,61656,500,4,11,0,0,0,14,83],["Champaigne, Brian",2,0,1,1,5,4,1,0,11,3,4,110929,450,5,8,0,7,0,16,63],["Chan, Lin",3,0,1,0,5,4,3,0,8,3,21,54237,330,4,11,0,0,0,14,86],["Chang, Donovan  E",3,0,1,1,5,5,3,0,20,3,21,60380,380,5,4,0,0,0,13,95],["Chigurh, Anton",4,0,1,1,2,2,3,0,16,3,2,66808,300,5,17,0,0,0,12,106],["Chivukula, Enola",3,2,1,0,5,4,3,0,1,14,21,64786,430,4,3,0,0,1,11,44],["Cierpiszewski, Caroline",3,0,1,0,2,4,3,0,14,3,21,64816,358,5,3,0,0,0,11,113],["Clayton, Rick",2,0,1,1,5,4,3,0,9,3,16,68678,470,3,2,0,6,0,12,103],["Cloninger, Jennifer",3,2,1,0,5,3,1,0,4,17,22,64066,420,5,9,0,0,1,11,16],["Close, Phil",3,2,1,1,5,4,1,0,6,5,22,59369,420,4,6,0,0,1,10,11],["Clukey, Elijian",3,0,0,1,5,2,1,0,4,3,21,50373,410,4,5,0,0,0,16,65],["Cockel, James",3,0,1,1,5,2,3,0,6,3,21,63108,440,5,3,0,0,0,13,95],["Cole, Spencer",3,1,2,1,2,5,3,0,15,13,21,59144,200,3,16,5,0,1,11,52],["Corleone, Michael",3,0,2,1,5,0,0,0,10,3,20,68051,413,2,3,3,0,0,10,125],["Corleone, Vito",3,0,0,1,2,4,3,0,10,3,9,170500,370,5,15,0,0,0,9,140],["Cornett, Lisa",3,0,1,0,5,4,1,1,13,3,21,63381,473,5,6,0,0,0,15,80],["Costello, Frank",2,0,1,1,5,4,1,0,19,3,6,83552,304,3,2,0,6,0,15,78],["Crimmings,   Jean",3,0,1,0,5,5,3,0,17,3,21,56149,412,5,15,0,0,0,16,65],["Cross, Noah",2,0,1,1,5,2,3,0,18,3,30,92329,500,3,5,0,4,0,14,81],["Daneault, Lynn",4,0,1,0,5,4,3,0,7,3,23,65729,462,4,8,0,0,0,14,87],["Daniele, Ann",2,0,1,0,5,5,1,0,18,3,30,85028,310,5,19,0,8,0,14,81],["Darson, Jene'ya",3,0,1,0,5,4,1,0,8,3,21,57583,500,3,1,0,0,0,12,105],["Davis, Daniel",3,0,1,1,4,5,3,0,15,3,22,56294,396,4,6,0,0,0,11,112],["Dee, Randy",3,0,1,1,5,4,1,0,4,3,21,56991,430,4,2,2,3,0,18,45],["DeGweck,  James",3,2,1,1,5,4,1,0,20,17,21,55722,500,4,14,0,0,1,11,51],["Del Bosque, Keyla",5,0,1,0,2,0,3,0,0,3,26,101199,379,5,8,0,5,0,12,110],["Delarge, Alex",4,0,3,1,4,4,3,0,12,3,2,61568,193,3,5,6,0,0,14,83],["Demita, Carla",3,2,1,0,2,3,2,0,13,11,22,58275,462,5,1,0,0,1,11,46],["Desimone, Carl",3,0,3,1,5,4,1,0,1,3,21,53189,112,2,9,4,0,0,14,85],["DeVito, Tommy",2,0,1,1,5,4,3,0,5,3,3,96820,301,5,15,0,7,0,17,59],["Dickinson, Geoff",3,0,1,1,5,4,3,0,14,3,21,51259,430,4,1,0,0,0,14,86],["Dietrich, Jenna",4,0,3,0,5,8,3,1,12,3,2,59231,230,1,17,2,0,0,12,109],["DiNocco, Lily",3,0,2,0,2,4,1,0,4,3,21,61584,388,4,6,0,0,0,13,100],["Dobrin, Denisa  S",3,0,1,0,5,0,3,1,6,3,21,46335,340,5,15,0,0,0,12,108],["Dolan, Linda",2,0,1,0,5,2,1,0,18,3,16,70621,411,4,16,0,6,0,15,80],["Dougall, Eric",2,0,0,1,2,4,3,0,11,3,15,138888,430,5,4,0,5,0,14,90],["Driver, Elle",4,0,0,0,5,4,3,0,16,3,2,74241,477,5,14,0,0,0,11,120],["Dunn, Amy",3,0,1,0,5,3,3,0,10,3,20,75188,452,4,4,0,0,0,14,83],["Dunne, Amy",3,0,1,0,5,3,1,0,14,3,21,62514,290,3,6,0,0,0,10,127],["Eaton, Marianne",3,2,1,0,5,3,1,0,15,10,21,60070,500,3,7,0,0,1,11,62],["Engdahl, Jean",3,0,1,1,5,5,3,0,13,3,21,48888,470,5,8,0,0,0,14,81],["England, Rex",3,0,1,1,5,2,1,0,13,3,21,54285,420,3,3,0,0,0,14,88],["Erilus, Angela",3,0,3,0,5,4,2,0,17,3,22,56847,300,1,5,2,0,0,14,85],["Estremera, Miguel",3,1,2,1,5,3,3,0,17,4,21,60340,500,4,16,5,0,1,12,65],["Evensen, April",3,1,2,0,5,3,3,0,8,12,21,59124,230,3,19,5,0,1,14,40],["Exantus, Susan",5,1,2,0,2,4,1,0,0,4,26,99280,210,5,19,4,4,1,11,21],["Faller, Megan",3,0,1,0,2,5,1,0,8,3,22,71776,440,5,17,0,0,0,14,85],["Fancett, Nicole",3,0,1,0,2,5,3,0,20,3,22,65902,400,4,7,0,0,0,14,89],["Ferguson, Susan",3,2,1,0,5,3,1,0,20,10,21,57748,313,3,16,0,0,1,11,45],["Fernandes, Nilson",3,0,3,1,5,4,1,0,1,3,21,64057,156,5,15,6,0,0,15,76],["Fett, Boba",2,0,3,1,5,5,3,0,18,3,17,53366,120,3,2,3,6,0,15,78],["Fidelia,  Libby",3,0,1,0,5,3,1,0,4,3,21,58530,500,5,19,0,0,0,12,110],["Fitzpatrick, Michael  J",3,2,1,1,5,3,3,1,1,7,22,72609,476,5,20,0,0,1,11,21],["Foreman, Tanya",3,2,1,0,5,3,1,0,14,5,22,55965,366,3,6,0,0,1,11,18],["Forrest, Alex",4,1,3,1,5,2,1,0,16,1,2,70187,200,5,7,4,0,1,14,39],["Foss, Jason",2,0,0,1,2,4,3,0,11,3,12,178000,500,5,15,0,5,0,11,117],["Foster-Baker, Amy",0,0,1,0,5,7,1,2,2,3,28,99351,500,3,3,0,2,0,9,140],["Fraval, Maruk",4,0,1,1,2,0,3,0,16,3,2,67251,430,3,7,2,0,0,11,113],["Galia, Lisa",2,0,1,0,5,5,3,0,9,3,16,65707,470,4,1,0,5,0,10,127],["Garcia, Raul",3,0,1,1,5,2,3,1,6,3,21,52249,450,3,5,0,0,0,15,78],["Gaul, Barbara",3,0,1,0,2,5,3,1,13,3,21,53171,420,4,12,0,0,0,11,116],["Gentry, Mildred",3,0,1,0,2,5,1,0,17,3,21,51337,373,3,19,0,0,0,15,78],["Gerke, Melisa",3,2,1,0,2,1,0,0,8,7,21,51505,424,4,2,0,0,1,11,50],["Gill, Whitney",4,1,1,0,2,0,4,0,12,4,2,59370,397,4,7,0,0,1,14,12],["Gilles, Alex",3,2,2,1,2,1,1,0,20,10,21,54933,397,4,15,3,0,1,12,32],["Girifalco, Evelyn",3,0,0,0,4,4,3,1,1,3,21,57815,390,4,3,0,0,0,14,83],["Givens, Myriam",4,0,1,0,5,4,3,0,16,3,2,61555,450,5,20,0,0,0,15,79],["Goble, Taisha",2,1,1,0,5,4,3,0,19,12,8,114800,460,4,10,0,4,1,15,1],["Goeth, Amon",2,0,1,1,5,5,1,1,18,3,16,74679,430,5,20,0,7,0,15,78],["Gold, Shenice",3,0,1,0,5,4,3,1,14,3,21,53018,430,5,7,0,0,0,13,91],["Gonzalez, Cayo",3,0,0,1,2,1,0,0,4,3,21,59892,450,4,1,0,0,0,11,115],["Gonzalez, Juan",3,2,3,1,2,1,1,0,4,5,22,68898,300,3,10,3,0,1,10,11],["Gonzalez, Maria",2,0,1,0,5,2,2,1,18,3,16,61242,461,4,11,0,5,0,15,80],["Good, Susan",3,0,1,0,5,5,1,0,6,3,22,66825,460,3,20,0,0,0,14,86],["Gordon, David",3,0,1,1,5,5,1,0,6,3,21,48285,500,3,2,0,0,0,12,105],["Gosciminski, Phylicia",3,0,1,0,0,3,2,0,15,3,22,66149,440,5,1,0,0,0,13,93],["Goyal, Roxana",3,0,1,0,1,5,1,0,15,3,21,49256,410,5,3,0,0,0,13,94],["Gray, Elijiah",3,0,1,1,5,2,0,0,10,3,20,62957,463,3,2,0,0,0,15,76],["Gross, Paula",3,2,1,0,5,0,0,0,13,11,21,63813,500,5,17,0,0,1,11,29],["Gruber, Hans",2,0,1,1,2,4,1,0,5,3,3,99020,420,5,8,0,5,0,17,57],["Guilianno, Mike",4,2,1,1,4,5,3,0,12,14,2,71707,450,5,20,0,0,1,12,27],["Handschiegl, Joanne",3,0,1,0,5,3,1,0,17,3,21,54828,420,4,13,0,0,0,11,111],["Hankard, Earnest",3,0,1,1,5,5,3,1,13,3,22,64246,500,3,20,0,0,0,13,91],["Harrington, Christie",3,2,1,0,5,0,3,0,20,15,21,52177,464,4,8,0,0,1,12,39],["Harrison, Kara",3,0,0,0,5,0,1,0,1,3,21,62065,476,4,5,0,0,0,14,86],["Heitzman, Anthony",3,0,1,1,5,3,3,0,14,3,21,46998,417,4,1,0,0,0,12,104],["Hendrickson, Trina",3,2,1,0,5,0,3,0,13,7,22,68099,500,3,15,0,0,1,11,24],["Hitchcock, Alfred",4,0,1,1,0,4,1,0,12,3,2,70545,360,5,9,0,0,0,14,84],["Homberger, Adrienne  J",3,2,1,0,5,4,1,0,17,14,22,63478,303,5,16,0,0,1,11,6],["Horton, Jayne",2,0,1,0,5,4,3,0,19,3,8,97999,448,5,4,0,6,0,15,78],["Houlihan, Debra",4,0,1,0,5,5,1,0,10,3,10,180000,450,4,19,0,0,0,14,87],["Howard, Estelle",0,1,1,0,2,4,1,0,3,12,1,49920,324,3,6,0,4,1,15,2],["Hudson, Jane",3,0,1,0,5,5,3,0,14,3,21,55425,480,4,4,0,0,0,12,109],["Hunts, Julissa",3,0,1,0,5,5,3,0,8,3,22,69340,300,5,4,0,0,0,16,66],["Hutter, Rosalie",3,0,1,0,5,4,2,0,20,3,22,64995,450,3,6,0,0,0,15,76],["Huynh, Ming",3,2,1,0,5,3,0,0,1,17,22,68182,372,3,18,0,0,1,11,21],["Immediato, Walter",3,2,2,1,1,4,1,0,10,17,20,83082,234,2,4,3,0,1,11,16],["Ivey, Rose",3,0,1,0,5,4,3,0,4,3,21,51908,399,3,14,0,0,0,13,94],["Jackson, Maryellen",3,0,1,0,2,5,3,0,6,3,21,61242,410,3,7,0,0,0,12,102],["Jacobi, Hannah",3,0,1,0,5,2,0,0,15,3,21,45069,430,5,7,0,0,0,13,93],["Jeannite, Tayana",3,0,0,0,0,5,0,0,14,3,22,60724,460,4,11,0,0,0,11,115],["Jhaveri, Sneha",3,0,1,0,5,5,2,0,13,3,21,60436,500,5,9,0,0,0,14,90],["Johnson, George",3,2,0,1,5,0,1,0,17,11,21,46837,470,4,9,0,0,1,11,65],["Johnson, Noelle",2,0,1,0,1,4,1,0,19,3,8,105700,375,3,2,0,5,0,15,80],["Johnston, Yen",3,0,0,0,5,5,3,0,4,3,22,63322,430,3,1,0,0,0,14,85],["Jung, Judy",3,2,1,0,2,0,1,0,8,17,21,61154,400,4,4,0,0,1,11,52],["Kampew, Donysha",4,2,1,0,5,3,3,0,7,8,23,68999,450,5,2,0,0,1,11,25],["Keatts, Kramer",3,0,1,1,5,4,3,0,17,3,21,50482,307,4,10,0,0,0,13,93],["Khemmich, Bartholemew",4,0,1,1,5,4,3,0,16,3,2,65310,430,5,13,0,0,0,13,94],["King, Janet",1,0,1,0,5,4,1,1,2,3,18,250000,483,3,10,0,0,0,12,105],["Kinsella, Kathleen",3,2,1,0,5,3,1,0,20,11,21,54005,360,5,16,0,0,1,11,37],["Kirill, Alexandra",3,2,1,0,5,3,1,0,1,11,21,45433,349,4,6,0,0,1,11,23],["Knapp, Bradley  J",3,0,1,1,2,5,3,0,14,3,21,46654,310,3,3,0,0,0,14,89],["Kretschmer, John",3,0,1,1,1,4,1,0,4,3,21,63973,338,3,17,0,0,0,11,120],["Kreuger, Freddy",4,0,1,1,2,1,3,1,12,3,2,71339,365,5,20,0,0,0,11,118],["Lajiri,  Jyoti",2,0,1,1,5,2,1,0,18,3,30,93206,446,5,7,0,6,0,14,81],["Landa, Hans",3,1,1,1,5,2,1,0,10,4,20,82758,478,4,9,0,0,1,11,49],["Langford, Lindsey",3,2,1,0,1,4,0,0,6,0,22,66074,452,3,20,0,0,1,13,12],["Langton, Enrico",3,0,1,1,5,5,1,0,6,3,21,46120,500,5,13,0,0,0,12,105],["LaRotonda, William",0,0,1,1,2,8,0,0,3,3,0,64520,500,4,3,0,4,0,14,90],["Latif, Mohammed",3,2,1,1,5,3,1,0,15,11,22,61962,490,3,20,0,0,1,12,10],["Le, Binh",2,0,1,0,1,4,3,0,5,3,24,81584,410,5,2,0,7,0,16,63],["Leach, Dallas",3,2,1,0,1,0,3,0,15,16,21,63676,488,3,17,0,0,1,11,69],["LeBlanc, Brandon  R",0,0,1,1,5,0,1,0,10,3,25,93046,410,4,20,0,0,0,16,70],["Lecter, Hannibal",3,0,1,1,1,3,1,0,8,3,21,64738,410,3,10,0,0,0,12,106],["Leruth, Giovanni",4,0,1,1,2,8,2,0,12,3,2,70468,453,3,16,0,0,0,12,107],["Liebig, Ketsia",3,0,0,0,5,8,1,0,10,3,20,77915,410,3,11,0,0,0,13,93],["Linares, Marilyn",3,2,1,0,5,4,1,0,17,17,21,52624,318,4,16,0,0,1,11,72],["Linden, Mathew",3,0,1,1,5,5,1,0,13,3,22,63450,400,3,7,0,0,0,13,95],["Lindsay, Leonara",2,0,0,0,2,1,3,1,9,3,16,51777,464,4,14,0,5,0,11,120],["Lundy, Susan",3,2,1,0,5,5,4,0,17,11,22,67237,465,4,15,0,0,1,13,32],["Lunquist, Lisa",3,0,0,0,2,4,3,0,8,3,22,73330,420,4,19,0,0,0,13,94],["Lydon, Allison",3,0,1,0,2,8,1,0,8,3,21,52057,500,3,6,0,0,0,15,79],["Lynch, Lindsay",3,2,0,0,2,1,3,1,20,0,21,47434,500,4,17,0,0,1,11,40],["MacLennan, Samuel",3,2,1,1,5,4,4,0,1,7,21,52788,308,4,18,0,0,1,12,50],["Mahoney, Lauren",3,0,1,0,5,5,3,0,14,3,21,45395,460,4,14,0,0,0,14,90],["Manchester, Robyn",3,0,1,0,5,5,1,0,20,3,22,62385,500,3,4,0,0,0,16,66],["Mancuso, Karen",3,2,1,0,4,5,1,0,1,0,22,68407,500,4,16,0,0,1,11,11],["Mangal, Debbie",3,0,1,0,5,5,1,0,4,3,21,61349,410,3,11,0,0,0,13,91],["Martin, Sandra",5,0,1,0,1,3,3,0,0,3,26,105688,450,5,14,0,4,0,13,91],["Maurice, Shana",3,0,1,0,5,4,1,0,6,3,21,54132,500,4,8,0,0,0,11,116],["Carthy, B'rigit",3,0,1,0,2,5,3,0,14,3,22,55315,500,5,16,0,0,0,15,78],["Mckenna, Sandy",3,0,1,0,2,0,1,0,15,3,21,62810,393,3,20,0,0,0,13,100],["McKinzie, Jac",4,0,1,1,4,8,1,0,16,3,2,63291,340,4,7,0,0,0,16,65],["Meads, Elizabeth",3,2,1,0,2,1,3,0,13,0,21,62659,418,4,17,0,0,1,12,46],["Medeiros, Jennifer",3,0,1,0,5,0,3,0,17,3,21,55688,500,4,10,0,0,0,15,78],["Miller, Brannon",3,0,1,1,3,4,3,3,10,3,20,83667,437,3,2,0,0,0,12,104],["Miller, Ned",3,2,3,1,5,5,3,0,4,17,22,55800,300,2,6,6,0,1,11,31],["Monkfish, Erasumus",3,0,1,1,5,5,1,0,6,3,22,58207,370,3,14,0,0,0,11,112],["Monroe, Peter",2,0,2,1,2,1,1,1,11,3,14,157000,239,3,13,4,6,0,12,109],["Monterro, Luisa",3,0,0,0,2,4,3,0,15,3,22,72460,470,3,1,0,0,0,13,96],["Moran, Patrick",3,0,1,1,2,1,3,0,13,3,22,72106,410,4,12,0,0,0,12,110],["Morway, Tanya",2,0,1,0,5,0,1,0,18,3,17,52599,381,3,6,0,6,0,15,79],["Motlagh,  Dawn",3,0,1,0,5,5,0,0,8,3,21,63430,440,4,18,0,0,0,13,98],["Moumanil, Maliki",3,0,1,1,2,5,2,0,17,3,22,74417,429,5,11,0,0,0,13,96],["Myers, Michael",3,0,1,1,1,5,3,0,15,3,21,57575,410,4,13,0,0,0,13,95],["Navathe, Kurt",2,0,1,1,1,4,3,0,5,3,24,87921,500,3,17,0,6,0,17,59],["Ndzi, Colombui",3,2,1,1,2,1,3,0,20,16,21,50470,430,3,19,0,0,1,11,25],["Ndzi, Horia",3,2,1,1,5,2,1,0,1,11,21,46664,318,3,10,0,0,1,13,32],["Newman, Richard",3,0,1,1,5,5,1,0,14,3,21,48495,500,5,11,0,0,0,14,86],["Ngodup, Shari",3,0,0,0,2,1,2,0,4,3,21,52984,400,3,12,0,0,0,13,98],["Nguyen, Dheepa",4,0,1,0,4,4,3,0,16,3,2,63695,500,5,2,0,0,0,13,95],["Nguyen, Lei-Ming",3,0,1,0,5,5,3,0,6,3,21,62061,360,5,4,0,0,0,13,95],["Nowlan, Kristie",3,0,1,0,5,4,3,0,8,3,22,66738,453,5,5,0,0,0,14,81],["O'hare, Lynn",3,1,3,0,4,5,3,0,15,13,21,52674,233,2,3,6,0,1,14,41],["Oliver, Brooke",3,2,1,0,1,5,1,0,20,17,22,71966,500,3,17,0,0,1,12,13],["Onque, Jasmine",4,0,1,0,5,4,3,1,16,3,2,63051,428,3,1,0,0,0,13,93],["Osturnka, Adeel",3,0,0,1,5,5,1,0,13,3,21,47414,500,3,13,0,0,0,13,93],["Owad, Clinton",3,0,2,1,2,5,3,0,17,3,21,53060,425,3,6,4,0,0,14,89],["Ozark, Travis",4,0,1,1,5,8,3,0,12,3,2,68829,500,5,18,0,0,0,15,80],["Panjwani, Nina",3,2,1,0,5,3,1,0,8,0,21,63515,389,4,7,0,0,1,11,29],["Patronick, Lucas",5,2,0,1,2,1,3,0,0,0,26,108987,500,5,13,0,3,1,11,38],["Pearson, Randall",2,2,1,1,5,2,1,0,19,13,6,93093,470,4,19,0,5,1,14,14],["Smith, Martin",3,2,2,1,2,3,3,0,20,5,21,53564,354,5,15,4,0,1,11,70],["Pelletier, Ermine",3,2,2,0,1,0,1,0,1,17,22,60270,240,5,2,5,0,1,11,42],["Perry, Shakira",3,2,1,0,5,5,3,0,1,9,21,45998,345,4,5,0,0,1,11,44],["Peters, Lauren",3,2,0,0,5,4,1,0,14,11,22,57954,420,5,12,0,0,1,11,17],["Peterson, Ebonee",3,2,1,0,5,4,1,0,10,0,20,74669,416,5,6,0,0,1,10,56],["Petingill, Shana",3,0,1,0,1,5,1,0,4,3,22,74226,430,3,14,0,0,0,12,108],["Petrowsky, Thelma",2,0,0,0,2,2,1,0,19,3,6,93554,460,5,16,0,7,0,14,81],["Pham, Hong",3,2,1,1,1,3,1,0,4,11,21,64724,500,3,13,0,0,1,11,14],["Pitt, Brad",3,0,1,1,5,3,3,0,6,3,21,47001,366,3,15,0,0,0,7,152],["Potts, Xana",4,0,1,0,2,8,1,0,16,3,2,61844,420,5,9,0,0,0,12,110],["Power, Morissa",3,2,1,0,1,3,0,0,15,0,21,46799,317,4,14,0,0,1,11,71],["Punjabhi, Louis",3,0,1,1,5,2,3,0,13,3,21,59472,480,3,14,0,0,0,14,90],["Purinton, Janine",3,2,1,0,5,4,0,0,15,17,21,46430,450,5,16,0,0,1,12,7],["Quinn, Sean",5,2,1,1,2,1,1,0,10,5,26,83363,415,4,4,0,0,1,11,45],["Rachael, Maggie",2,0,1,0,2,4,1,0,5,3,3,95920,440,4,10,0,6,0,16,63],["Rarrick, Quinn",3,2,1,1,5,4,0,0,17,11,21,61729,380,5,19,0,0,1,11,65],["Ren, Kylo",4,0,1,1,5,0,1,0,12,3,2,61809,398,3,4,0,0,0,14,86],["Rhoads, Thomas",3,2,1,1,5,5,0,1,8,15,21,45115,500,4,11,0,0,1,11,47],["Rivera, Haley",3,0,0,0,1,3,1,0,20,3,21,46738,436,5,16,0,0,0,11,111],["Roberson, May",3,2,1,0,2,3,0,0,6,16,22,64971,450,4,10,0,0,1,11,1],["Robertson, Peter",3,2,1,1,5,4,1,0,15,0,22,55578,420,5,13,0,0,1,11,6],["Robinson, Alain",3,2,1,1,2,4,1,0,1,4,21,50428,500,3,11,0,0,1,11,50],["Robinson, Cherly",3,1,2,0,5,4,1,0,14,4,21,61422,360,3,16,4,0,1,11,54],["Robinson, Elias",3,0,0,1,5,2,4,0,4,3,21,63353,360,5,4,0,0,0,13,95],["Roby, Lori",2,0,1,0,5,2,1,0,19,3,6,89883,369,5,15,0,6,0,15,79],["Roehrich, Bianca",2,2,1,0,5,5,3,1,19,0,19,120000,388,3,12,0,7,1,15,38],["Roper, Katie",2,0,1,0,2,4,3,0,5,3,7,150290,494,3,17,0,5,0,17,60],["Rose, Ashley",3,0,1,0,5,8,2,0,6,3,21,60627,500,4,8,0,0,0,14,90],["Rossetti, Bruno",3,2,1,1,5,3,3,0,15,0,21,53180,500,5,4,0,0,1,11,74],["Roup,Simon",2,0,1,1,5,4,3,0,11,3,13,140920,360,5,13,0,7,0,13,100],["Ruiz, Ricardo",2,2,1,1,2,1,0,0,11,7,13,148999,430,4,8,0,6,1,12,38],["Saada, Adell",5,0,1,0,5,4,1,0,0,3,26,86214,420,3,2,0,6,0,12,102],["Saar-Beckles, Melinda",3,0,2,0,2,1,3,0,13,3,21,47750,260,4,4,5,0,0,16,65],["Sadki, Nore",3,2,1,1,5,3,3,0,17,14,21,46428,460,5,7,0,0,1,9,96],["Sahoo, Adil",3,0,1,1,5,0,1,0,13,3,22,57975,410,3,13,0,0,0,10,123],["Salter, Jason",2,2,1,1,2,5,0,0,19,7,6,88527,420,3,2,0,5,1,15,8],["Sander, Kamrin",3,0,1,0,2,5,1,0,8,3,21,56147,351,3,2,0,0,0,14,83],["Sewkumar, Nori",3,0,1,0,1,3,3,0,20,3,21,50923,500,5,14,0,0,0,13,93],["Shepard, Anita",2,0,1,0,5,5,1,0,18,3,17,50750,331,3,7,0,6,0,14,83],["Shields, Seffi",3,0,1,0,5,5,1,0,1,3,21,52087,481,4,15,0,0,0,13,94],["Simard, Kramer",2,0,1,1,5,2,1,1,19,3,6,87826,332,3,16,0,7,0,15,80],["Singh, Nan",0,0,1,0,5,8,3,0,3,3,1,51920,500,3,2,0,5,0,15,77],["Sloan, Constance",3,2,1,0,5,0,3,0,17,8,22,63878,468,4,20,0,0,1,9,55],["Smith, Joe",3,0,0,1,5,4,3,0,8,3,22,60656,430,3,4,0,0,0,14,83],["Smith, John",4,0,2,1,2,1,0,0,7,3,23,72992,240,4,16,2,0,0,14,86],["Smith, Leigh Ann",0,2,1,0,2,1,1,0,3,5,1,55000,380,4,17,0,4,1,11,20],["Smith, Sade",3,0,1,0,5,2,3,0,14,3,21,58939,373,3,16,0,0,0,13,91],["Soto, Julia",2,0,1,0,2,5,1,0,9,3,16,66593,430,3,19,0,5,0,11,116],["Soze, Keyser",2,0,1,1,1,5,1,0,18,3,30,87565,327,4,13,0,5,0,16,65],["Sparks, Taylor",3,0,3,0,5,4,1,0,4,3,21,64021,240,2,20,6,1,0,12,109],["Spirea, Kelley",3,0,1,0,5,5,1,0,10,3,20,65714,483,5,15,0,0,0,12,103],["Squatrito, Kristen",3,2,0,0,5,5,0,0,6,17,21,62425,410,4,16,0,0,1,13,21],["Stanford,Barbara  M",3,0,1,0,4,3,0,0,15,3,21,47961,410,4,9,0,0,0,11,120],["Stansfield, Norman",4,0,3,1,5,8,1,0,16,3,2,58273,181,2,5,3,0,0,14,86],["Steans, Tyrone",0,0,1,1,5,4,3,0,3,3,0,63003,390,5,9,0,5,0,14,83],["Stoica, Rick",3,0,1,1,1,5,1,0,13,3,21,61355,470,3,4,0,0,0,14,89],["Strong, Caitrin",4,0,1,0,2,4,1,0,12,3,2,60120,410,4,18,0,0,0,10,123],["Sullivan, Kissy",3,0,1,0,2,4,1,0,10,3,20,63682,373,4,12,0,0,0,9,140],["Sullivan, Timothy",3,0,1,1,5,3,1,1,17,3,21,63025,436,5,10,0,0,0,15,80],["Sutwell, Barbara",3,0,1,0,1,4,3,0,8,3,21,59238,340,5,13,0,0,0,12,106],["Szabo, Andrew",5,0,0,1,5,5,3,0,0,3,26,92989,450,5,1,0,5,0,14,85],["Tannen, Biff",2,0,1,1,5,4,1,0,5,3,3,90100,340,3,14,0,6,0,17,57],["Tavares, Desiree",3,2,1,0,2,1,1,0,20,0,21,60754,450,5,11,0,0,1,9,39],["Tejeda, Lenora",3,2,1,0,5,3,1,0,8,0,22,72202,393,3,3,0,0,1,11,62],["Terry, Sharlene",4,0,1,0,2,4,3,0,16,3,2,58370,369,3,18,0,0,0,14,83],["Theamstern, Sophia",3,2,1,0,5,4,3,0,1,16,21,48413,398,4,1,0,0,1,11,52],["Thibaud, Kenneth",3,2,1,1,5,7,4,0,20,10,22,67176,410,4,15,0,0,1,7,32],["Tippett, Jeanette",3,0,1,0,2,4,0,0,4,3,21,56339,421,5,4,0,0,0,13,99],["Torrence, Jack",4,0,0,1,5,4,2,0,16,3,2,64397,410,3,6,0,0,0,6,170],["Trang, Mei",3,0,2,0,5,5,3,0,6,3,21,63025,244,5,18,4,0,0,14,89],["Tredinnick, Neville",2,2,1,1,5,0,1,0,18,9,17,75281,500,3,11,0,5,1,15,11],["True, Edward",5,2,1,1,2,1,3,0,0,9,26,100416,460,3,9,0,4,1,13,52],["Trzeciak, Cybil",3,2,1,0,5,5,3,0,1,17,22,74813,440,3,5,0,0,1,11,35],["Turpin, Jumil",2,0,1,1,5,2,1,0,18,3,17,76029,500,4,8,0,7,0,15,78],["Valentin,Jackie",4,0,1,0,4,4,1,0,12,3,2,57859,281,3,16,0,0,0,11,115],["Veera, Abdellah",3,2,0,1,5,5,0,0,15,8,21,58523,450,5,15,0,0,1,12,35],["Vega, Vincent",3,0,1,1,5,2,0,0,10,3,20,88976,393,3,19,0,0,0,11,114],["Villanueva, Noah",4,0,1,1,1,8,3,0,12,3,2,55875,450,4,11,0,0,0,12,108],["Voldemort, Lord",2,1,1,1,2,2,1,0,19,12,8,113999,433,3,9,0,7,1,15,20],["Volk, Colleen",3,1,0,0,5,3,1,0,13,6,21,49773,430,5,18,0,0,1,11,44],["Von Massenbach, Anna",3,0,1,0,5,5,3,0,17,3,21,62068,321,3,7,0,0,0,15,75],["Walker, Roger",3,0,1,1,2,2,3,0,14,3,22,66541,311,5,4,0,0,0,14,84],["Wallace, Courtney  E",3,2,1,0,2,1,1,0,10,0,20,80512,450,3,5,0,0,1,11,3],["Wallace, Theresa",3,2,2,0,5,0,3,0,8,5,21,50274,250,3,13,6,0,1,12,31],["Wang, Charlie",2,0,1,1,1,4,3,0,5,3,24,84903,342,4,17,0,7,0,17,59],["Warfield, Sarah",2,0,1,0,1,2,4,0,18,3,30,107226,420,4,7,0,8,0,15,78],["Whittier, Scott",3,2,1,1,5,5,3,1,20,7,21,58371,500,5,11,0,0,1,11,33],["Wilber, Barry",3,2,1,1,5,8,1,0,1,17,21,55140,500,3,7,0,0,1,11,43],["Wilkes, Annie",3,2,1,0,5,3,0,0,14,0,21,58062,360,5,9,0,0,1,11,13],["Williams, Jacquelyn",3,2,1,0,2,1,3,1,14,14,21,59728,430,4,16,0,0,1,12,35],["Winthrop, Jordan",3,2,0,1,5,5,3,0,4,15,22,70507,500,3,7,0,0,1,13,31],["Wolk, Hang  T",3,0,1,0,5,5,3,0,6,3,22,60446,340,4,14,0,0,0,14,83],["Woodson, Jason",3,0,1,1,5,5,3,0,15,3,22,65893,407,4,13,0,0,0,14,85],["Ybarra, Catherine",3,2,3,0,1,3,3,0,4,0,21,48513,320,2,4,5,0,1,8,71],["Zamora, Jennifer",2,0,0,0,5,2,3,0,10,3,5,220450,460,5,16,0,6,0,10,127],["Zhou, Julia",2,0,1,0,5,2,3,0,19,3,6,89292,500,3,11,0,5,0,15,78],["Zima, Colleen",3,0,1,0,1,5,4,0,6,3,21,45046,450,5,2,0,0,0,14,83]]};
+var D = _DB.R.map(function(r){
+  return {
+    name:r[0],dept:_DB.D[r[1]],status:_DB.ST[r[2]],perf:_DB.PE[r[3]],
+    sex:_DB.SE[r[4]],race:_DB.RA[r[5]],source:_DB.SO[r[6]],
+    marital:_DB.MA[r[7]],hispanic:_DB.HI[r[8]],manager:_DB.MG[r[9]],
+    termreason:_DB.TR[r[10]],position:_DB.PO[r[11]],
+    salary:r[12],engagement:r[13]/100,satisfaction:r[14],
+    absences:r[15],late:r[16],projects:r[17],termd:r[18],
+    hire_year:r[19]+2000,tenure:r[20]/10
+  };
+});
+
+// ═══════════════════════════════════
+// PROFESSIONAL COLOUR SYSTEM
+// Single accent + semantic only — no rainbow
+// ═══════════════════════════════════
+var AC  = '#2D5F8A';  // accent — slate blue (bars, lines, dots)
+var AC2 = '#1E4A6E';  // accent dark
+var AC3 = '#EBF3FA';  // accent light fill
+var GR  = '#2E7D52';  // green — good/active
+var AM  = '#8A6020';  // amber — warning/vol term
+var RD  = '#B33A3A';  // red — critical/terminated
+
+// Donut / multi-series use 3-step tonal scale of accent
+var TONAL = ['#1E4A6E','#2D5F8A','#4A84B0','#6FA4CC','#9DC3E0','#C8DFF0'];
+
+// Perf colours — semantic
+var PERF_C = {'Exceeds':GR,'Fully Meets':AC,'Needs Improvement':AM,'PIP':RD};
+var STAT_C = {'Active':GR,'Voluntarily Terminated':AM,'Terminated for Cause':RD};
+var KBARS  = [AC,GR,RD,AM,'#5B6E8A','#3A7A6A',RD,GR];
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+var S = {
+  name:'',dept:null,status:null,perf:null,sex:null,source:null,
+  race:null,hispanic:null,marital:null,sat:null,termreason:null,
+  position:null,manager:null,salMin:45000,salMax:250000
+};
+var VIS = null;
+var tAll=[],tShown=50,tSortCol='name',tSortAsc=true;
+
+// ═══════════════════════════════════
+// FILTER ENGINE
+// ═══════════════════════════════════
+function computeVis(){
+  var hf=S.name||S.dept||S.status||S.perf||S.sex||S.source||S.race||
+     S.hispanic||S.marital||S.sat!==null||S.termreason||S.position||
+     S.manager||S.salMin>45000||S.salMax<250000;
+  if(!hf){VIS=null;return;}
+  VIS=[];
+  for(var i=0;i<D.length;i++){
+    var r=D[i];
+    if(S.name&&r.name.toLowerCase().indexOf(S.name.toLowerCase())<0)continue;
+    if(S.dept&&r.dept!==S.dept)continue;
+    if(S.status&&r.status!==S.status)continue;
+    if(S.perf&&r.perf!==S.perf)continue;
+    if(S.sex&&r.sex!==S.sex)continue;
+    if(S.source&&r.source!==S.source)continue;
+    if(S.race&&r.race!==S.race)continue;
+    if(S.hispanic&&r.hispanic!==S.hispanic)continue;
+    if(S.marital&&r.marital!==S.marital)continue;
+    if(S.sat!==null&&r.satisfaction!==S.sat)continue;
+    if(S.termreason&&r.termreason!==S.termreason)continue;
+    if(S.position&&r.position!==S.position)continue;
+    if(S.manager&&r.manager!==S.manager)continue;
+    if(r.salary<S.salMin||r.salary>S.salMax)continue;
+    VIS.push(i);
+  }
+}
+function rows(){return VIS!==null?VIS.map(function(i){return D[i];}):D;}
+
+// ═══════════════════════════════════
+// AGGREGATE
+// ═══════════════════════════════════
+function agg(){
+  var R=rows(),n=R.length;
+  if(!n)return{total:0,active:0,termd:0,atr:'0.0',avgSal:0,avgEng:0,avgSat:0,
+    avgAbs:0,avgLate:0,avgTenure:0,div:0,
+    dept:{},status:{},perf:{},sex:{},source:{},race:{},term:{},
+    hireYr:{},sat:{},pos:{},salDept:{},engDept:{},attrDept:{},
+    tenDept:{},absDept:{},latePerf:{},projDept:{},mgrAttr:{}};
+  var active=0,termd=0,salS=0,engS=0,satS=0,absS=0,lateS=0,tenS=0,nonW=0;
+  var dept={},status={},perf={},sex={},source={},race={},term={},hireYr={},sat={},pos={};
+  var _salS={},_salC={},_engS={},_engC={},_tenS={},_tenC={};
+  var _absS={},_absC={},_lateS={},_lateC={},_projS={},_projC={};
+  var dT={},dTm={},mT={},mTm={};
+  for(var i=0;i<n;i++){
+    var r=R[i],d=r.dept,pe=r.perf,st=r.status,hy=r.hire_year,mg=r.manager;
+    if(st==='Active')active++;
+    if(r.termd)termd++;
+    salS+=r.salary;engS+=r.engagement;satS+=r.satisfaction;
+    absS+=r.absences;lateS+=r.late;tenS+=r.tenure;
+    if(r.race!=='White')nonW++;
+    dept[d]=(dept[d]||0)+1;status[st]=(status[st]||0)+1;
+    perf[pe]=(perf[pe]||0)+1;sex[r.sex]=(sex[r.sex]||0)+1;
+    if(r.source&&r.source!=='nan')source[r.source]=(source[r.source]||0)+1;
+    race[r.race]=(race[r.race]||0)+1;
+    if(r.termreason&&r.termreason!=='N/A-StillEmployed'&&r.termreason!=='N/A'&&r.termreason!=='nan')
+      term[r.termreason]=(term[r.termreason]||0)+1;
+    if(hy>2005&&hy<2020)hireYr[hy]=(hireYr[hy]||0)+1;
+    sat[r.satisfaction]=(sat[r.satisfaction]||0)+1;
+    pos[r.position]=(pos[r.position]||0)+1;
+    _salS[d]=(_salS[d]||0)+r.salary;_salC[d]=(_salC[d]||0)+1;
+    _engS[d]=(_engS[d]||0)+r.engagement;_engC[d]=(_engC[d]||0)+1;
+    _tenS[d]=(_tenS[d]||0)+r.tenure;_tenC[d]=(_tenC[d]||0)+1;
+    _absS[d]=(_absS[d]||0)+r.absences;_absC[d]=(_absC[d]||0)+1;
+    _lateS[pe]=(_lateS[pe]||0)+r.late;_lateC[pe]=(_lateC[pe]||0)+1;
+    _projS[d]=(_projS[d]||0)+r.projects;_projC[d]=(_projC[d]||0)+1;
+    dT[d]=(dT[d]||0)+1;if(r.termd)dTm[d]=(dTm[d]||0)+1;
+    if(mg&&mg!=='nan'){mT[mg]=(mT[mg]||0)+1;if(r.termd)mTm[mg]=(mTm[mg]||0)+1;}
+  }
+  function avg(s,c){var o={};Object.keys(s).forEach(function(k){o[k]=+(s[k]/c[k]).toFixed(2);});return o;}
+  var attrDept={};Object.keys(dT).forEach(function(d){attrDept[d]=+((dTm[d]||0)/dT[d]*100).toFixed(1);});
+  var mgrAttr={};Object.keys(mT).forEach(function(m){if(mT[m]>=5)mgrAttr[m]=+((mTm[m]||0)/mT[m]*100).toFixed(1);});
+  return{total:n,active:active,termd:termd,atr:((termd/n)*100).toFixed(1),
+    avgSal:Math.round(salS/n),avgEng:+(engS/n).toFixed(2),avgSat:+(satS/n).toFixed(1),
+    avgAbs:+(absS/n).toFixed(1),avgLate:+(lateS/n).toFixed(2),avgTenure:+(tenS/n).toFixed(1),
+    div:+(nonW/n*100).toFixed(1),
+    dept:dept,status:status,perf:perf,sex:sex,source:source,race:race,
+    term:term,hireYr:hireYr,sat:sat,pos:pos,
+    salDept:avg(_salS,_salC),engDept:avg(_engS,_engC),tenDept:avg(_tenS,_tenC),
+    absDept:avg(_absS,_absC),latePerf:avg(_lateS,_lateC),projDept:avg(_projS,_projC),
+    attrDept:attrDept,mgrAttr:mgrAttr};
+}
+
+// ═══════════════════════════════════
+// SVG ENGINE
+// KEY FIX: data-k on <rect>/<path>/<circle> — the actual clicked element
+// NOT on <g> parent which is unreliable cross-browser
+// ═══════════════════════════════════
+function esc(v){return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+function tx(x,y,txt,fs,fill,anc,w){
+  return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anc||'start')+'" dominant-baseline="middle"'+
+    ' font-size="'+(fs||11)+'" fill="'+(fill||'#6B635A')+'" font-weight="'+(w||'normal')+'"'+
+    ' font-family="system-ui,sans-serif">'+txt+'</text>';
+}
+function grid_h(pl,pt,pw,ph,mv,fmt){
+  var s='';
+  [0,0.25,0.5,0.75,1].forEach(function(f){
+    var gy=pt+ph*(1-f);
+    s+='<line x1="'+pl+'" y1="'+gy+'" x2="'+(pl+pw)+'" y2="'+gy+'" stroke="#E8E3DC" stroke-width="1"/>';
+    s+=tx(pl-6,gy,fmt(+(mv*f).toFixed(1)),10,'#9E9690','end');
+  });
+  return s;
+}
+
+function setChart(wid,eid,svg){
+  var w=document.getElementById(wid),e=document.getElementById(eid);
+  if(!w)return;
+  if(!svg){w.innerHTML='';if(e)e.classList.add('on');}
+  else{if(e)e.classList.remove('on');w.innerHTML=svg;}
+}
+
+function sortEnt(obj,lim){
+  return Object.keys(obj).map(function(k){return{k:k,v:obj[k]};})
+    .sort(function(a,b){return b.v-a.v;}).slice(0,lim||99);
+}
+
+// ── HORIZONTAL BAR — data-k on rect (the clicked element) ──
+function hbar(entries,W,H,selVal,fmt,maxV){
+  if(!entries.length)return null;
+  fmt=fmt||function(v){return v;};
+  var lw=130,pr=16,pt=10,pb=10;
+  var bArea=W-lw-pr,plotH=H-pt-pb;
+  var mv=maxV||Math.max.apply(null,entries.map(function(e){return e.v;}))||1;
+  var bh=Math.max(12,Math.floor((plotH/entries.length)*0.64));
+  var gap=(plotH-bh*entries.length)/(entries.length+1);
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  entries.forEach(function(e){
+    var y=pt+gap*(entries.indexOf(e)+1)+bh*entries.indexOf(e);
+    var bw=Math.max(3,(e.v/mv)*bArea);
+    var op=(selVal&&e.k!==selVal)?0.2:1;
+    var lbl=String(e.label||e.k).slice(0,18);
+    s+=tx(lw-7,y+bh/2,lbl,11,'#3C3630','end');
+    // FIX: data-k directly on rect — reliable click target
+    s+='<rect x="'+lw+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="3" fill="'+e.c+'" opacity="'+op+'" data-k="'+esc(e.k)+'"/>';
+    s+=tx(lw+bw+5,y+bh/2,fmt(e.v),10,'#9E9690','start');
+  });
+  s+='</svg>';return s;
+}
+
+// ── VERTICAL BAR — data-k on rect ──
+function vbar(entries,W,H,selVal,fmt,maxV,refLine){
+  if(!entries.length)return null;
+  fmt=fmt||function(v){return Math.round(v);};
+  var pl=48,pr=12,pt=12,pb=28;
+  var pw=W-pl-pr,ph=H-pt-pb;
+  var mv=maxV||Math.max.apply(null,entries.map(function(e){return e.v;}))||1;
+  var bw=Math.max(14,Math.floor((pw/entries.length)*0.62));
+  var gap=(pw-bw*entries.length)/(entries.length+1);
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  s+=grid_h(pl,pt,pw,ph,mv,fmt);
+  if(refLine!=null){
+    var ry=pt+ph*(1-refLine/mv);
+    s+='<line x1="'+pl+'" y1="'+ry+'" x2="'+(pl+pw)+'" y2="'+ry+'" stroke="'+AC+'" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.5"/>';
+    s+=tx(pl+pw-2,ry-7,fmt(refLine)+'%',9,AC,'end');
+  }
+  entries.forEach(function(e,i){
+    var x=pl+gap*(i+1)+bw*i;
+    var bh=Math.max(3,(e.v/mv)*ph);
+    var by=pt+ph-bh;
+    var op=(selVal&&e.k!==selVal)?0.2:1;
+    var lbl=String(e.label||e.k).slice(0,10);
+    // data-k on rect
+    s+='<rect x="'+x+'" y="'+by+'" width="'+bw+'" height="'+bh+'" rx="3" fill="'+e.c+'" opacity="'+op+'" data-k="'+esc(e.k)+'"/>';
+    s+=tx(x+bw/2,pt+ph+14,lbl,10,'#6B635A','middle');
+  });
+  s+='</svg>';return s;
+}
+
+// ── DONUT — data-k on path ──
+function donut(slices,W,H,cx,cy,ri,ro,selVal){
+  if(!slices.length)return null;
+  var total=slices.reduce(function(s,e){return s+e.v;},0)||1;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  var angle=-Math.PI/2;
+  slices.forEach(function(e){
+    var a=e.v/total*Math.PI*2;
+    if(a<0.001){angle+=a;return;}
+    var x1=cx+ro*Math.cos(angle),y1=cy+ro*Math.sin(angle);
+    var x2=cx+ro*Math.cos(angle+a),y2=cy+ro*Math.sin(angle+a);
+    var xi1=cx+ri*Math.cos(angle),yi1=cy+ri*Math.sin(angle);
+    var xi2=cx+ri*Math.cos(angle+a),yi2=cy+ri*Math.sin(angle+a);
+    var lg=a>Math.PI?1:0;
+    var op=(selVal&&e.k!==selVal)?0.15:1;
+    // data-k on path — clicked element
+    s+='<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+ro+','+ro+' 0 '+lg+',1 '+
+      x2.toFixed(1)+','+y2.toFixed(1)+' L'+xi2.toFixed(1)+','+yi2.toFixed(1)+
+      ' A'+ri+','+ri+' 0 '+lg+',0 '+xi1.toFixed(1)+','+yi1.toFixed(1)+'Z"'+
+      ' fill="'+e.c+'" opacity="'+op+'" stroke="#FFFFFF" stroke-width="2" data-k="'+esc(e.k)+'"/>';
+    angle+=a;
+  });
+  // legend
+  var lx=cx+ro+16;
+  slices.slice(0,6).forEach(function(e,i){
+    var ly=cy-50+i*23;
+    var op=(selVal&&e.k!==selVal)?0.2:1;
+    s+='<circle cx="'+(lx+5)+'" cy="'+(ly+5)+'" r="5" fill="'+e.c+'" opacity="'+op+'"/>';
+    s+=tx(lx+15,ly+5,String(e.label||e.k).slice(0,14),10,'#6B635A','start');
+    s+=tx(W-10,ly+5,((e.v/total)*100).toFixed(0)+'%',10,'#1A1714','end','600');
+  });
+  s+='</svg>';return s;
+}
+
+// ── WAFFLE — data-k on rect ──
+function waffle(f,m,sel){
+  var total=f+m;if(!total)return null;
+  var W=290,H=182,cols=10,rows=5;
+  var cells=cols*rows,fC=Math.round(f/total*cells);
+  var cw=(W-22)/cols,ch=(H-42)/rows;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  for(var i=0;i<cells;i++){
+    var col=i%cols,row=Math.floor(i/cols);
+    var x=11+col*cw,y=11+row*ch;
+    var isFem=i<fC,k=isFem?'F':'M';
+    var c=isFem?'#8A4A6E':'#2D5F8A';// muted rose vs slate
+    var op=(sel&&sel!==k)?0.12:0.82;
+    // data-k on rect
+    s+='<rect x="'+(x+1)+'" y="'+(y+1)+'" width="'+(cw-3)+'" height="'+(ch-3)+'" rx="2" fill="'+c+'" opacity="'+op+'" data-k="'+k+'"/>';
+  }
+  var base=H-26;
+  s+='<rect x="11" y="'+base+'" width="10" height="10" rx="2" fill="#8A4A6E" opacity="0.82"/>';
+  s+=tx(25,base+5,'Female  '+(f/total*100).toFixed(0)+'%  ('+f+')',11,'#3C3630','start');
+  s+='<rect x="152" y="'+base+'" width="10" height="10" rx="2" fill="#2D5F8A" opacity="0.82"/>';
+  s+=tx(166,base+5,'Male  '+(m/total*100).toFixed(0)+'%  ('+m+')',11,'#3C3630','start');
+  s+='</svg>';return s;
+}
+
+// ── LOLLIPOP — data-k on circle ──
+function lollipop(entries,W,H,selVal){
+  if(!entries.length)return null;
+  var lw=84,pr=46,pt=12,pb=22;
+  var plotW=W-lw-pr,plotH=H-pt-pb;
+  var mv=75,step=plotH/(entries.length+1);
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  [0,25,50,75].forEach(function(v){
+    var gx=lw+(v/mv)*plotW;
+    s+='<line x1="'+gx+'" y1="'+pt+'" x2="'+gx+'" y2="'+(pt+plotH)+'" stroke="#E8E3DC" stroke-width="1"/>';
+    s+=tx(gx,pt+plotH+13,v+'%',10,'#9E9690','middle');
+  });
+  entries.forEach(function(e,i){
+    var y=pt+step*(i+1);
+    var lx=lw+(Math.min(e.v,75)/mv)*plotW;
+    var op=(selVal&&e.k!==selVal)?0.2:1;
+    s+='<line x1="'+lw+'" y1="'+y+'" x2="'+lx+'" y2="'+y+'" stroke="'+e.c+'" stroke-width="2" opacity="'+(op*0.35)+'"/>';
+    // data-k on circle
+    s+='<circle cx="'+lx+'" cy="'+y+'" r="8" fill="'+e.c+'" opacity="'+op+'" data-k="'+esc(e.k)+'"/>';
+    s+=tx(lw-7,y,String(e.label||e.k).slice(0,11),11,'#3C3630','end');
+    s+=tx(lx+12,y,e.v.toFixed(0)+'%',10,'#6B635A','start','600');
+  });
+  s+='</svg>';return s;
+}
+
+// ── SCATTER (no click needed) ──
+function scatter(datasets,W,H){
+  var all=[];datasets.forEach(function(d){all=all.concat(d.pts);});
+  if(!all.length)return null;
+  var pl=52,pr=14,pt=12,pb=32;
+  var pw=W-pl-pr,ph=H-pt-pb;
+  var xs=all.map(function(p){return p.x;}),ys=all.map(function(p){return p.y;});
+  var mnx=Math.min.apply(null,xs)*0.97,mxx=Math.max.apply(null,xs)*1.03;
+  function px(x){return pl+(x-mnx)/(mxx-mnx||1)*pw;}
+  function py(y){return pt+(1-y/5.5)*ph;}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  [0,1,2,3,4,5].forEach(function(v){
+    var gy=py(v);
+    s+='<line x1="'+pl+'" y1="'+gy+'" x2="'+(pl+pw)+'" y2="'+gy+'" stroke="#E8E3DC" stroke-width="1"/>';
+    s+=tx(pl-6,gy,v,10,'#9E9690','end');
+  });
+  [50,100,150,200,250].forEach(function(v){
+    var gx=px(v*1000);
+    if(gx>pl&&gx<pl+pw){
+      s+='<line x1="'+gx+'" y1="'+pt+'" x2="'+gx+'" y2="'+(pt+ph)+'" stroke="#E8E3DC" stroke-width="1"/>';
+      s+=tx(gx,pt+ph+14,'$'+v+'K',10,'#9E9690','middle');
+    }
+  });
+  s+=tx(10,pt+ph/2,'Engagement',10,'#9E9690','middle');
+  datasets.forEach(function(ds){
+    ds.pts.forEach(function(p){
+      s+='<circle cx="'+px(p.x).toFixed(1)+'" cy="'+py(p.y).toFixed(1)+'" r="4" fill="'+ds.c+'" opacity="0.55"/>';
+    });
+  });
+  var lStep=pw/Math.max(datasets.length,1);
+  datasets.forEach(function(ds,i){
+    var lx=pl+i*lStep;
+    s+='<circle cx="'+(lx+5)+'" cy="'+(H-6)+'" r="4" fill="'+ds.c+'"/>';
+    s+=tx(lx+13,H-6,ds.label.slice(0,10),10,'#6B635A','start');
+  });
+  s+='</svg>';return s;
+}
+
+// ── DOT PLOT — no click ──
+function dotPlot(entries,avg,W,H){
+  if(!entries.length)return null;
+  var lw=120,pr=46,pt=14,pb=28;
+  var plotW=W-lw-pr,plotH=H-pt-pb;
+  var vals=entries.map(function(e){return e.v;});
+  var mn=Math.min.apply(null,vals.concat([avg]))*0.92;
+  var mx=Math.max.apply(null,vals.concat([avg]))*1.08;
+  function px(v){return lw+(v-mn)/(mx-mn||1)*plotW;}
+  var step=plotH/(entries.length+1);
+  var avgX=px(avg);
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<line x1="'+avgX+'" y1="'+pt+'" x2="'+avgX+'" y2="'+(pt+plotH)+'" stroke="'+AC+'" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>';
+  s+=tx(avgX,pt-5,'Avg '+avg,10,AC,'middle');
+  entries.forEach(function(e,i){
+    var y=pt+step*(i+1);
+    var dx=px(e.v);
+    var above=e.v>=avg,col=above?GR:RD;
+    s+='<line x1="'+avgX+'" y1="'+y+'" x2="'+dx+'" y2="'+y+'" stroke="'+col+'" stroke-width="1.5" opacity="0.3"/>';
+    s+='<circle cx="'+dx+'" cy="'+y+'" r="9" fill="'+col+'"/>';
+    s+=tx(dx,y,e.v,9,'#fff','middle','700');
+    s+=tx(lw-8,y,String(e.k).slice(0,15),11,'#3C3630','end');
+  });
+  s+='</svg>';return s;
+}
+
+// ── AREA LINE — no click ──
+function areaLine(pts,W,H,c){
+  if(pts.length<2)return null;
+  c=c||AC;
+  var pl=44,pr=14,pt=12,pb=28;
+  var pw=W-pl-pr,ph=H-pt-pb;
+  var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
+  var mnx=Math.min.apply(null,xs),mxx=Math.max.apply(null,xs);
+  var mxy=Math.max.apply(null,ys)*1.1||1;
+  function px(x){return pl+(x-mnx)/(mxx-mnx||1)*pw;}
+  function py(y){return pt+(1-y/mxy)*ph;}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  [0,0.33,0.67,1].forEach(function(f){
+    var gy=pt+ph*(1-f);
+    s+='<line x1="'+pl+'" y1="'+gy+'" x2="'+(pl+pw)+'" y2="'+gy+'" stroke="#E8E3DC" stroke-width="1"/>';
+    s+=tx(pl-6,gy,Math.round(mxy*f),10,'#9E9690','end');
+  });
+  var aPath='M'+px(pts[0].x).toFixed(1)+','+py(0).toFixed(1)+' ';
+  aPath+=pts.map(function(p){return 'L'+px(p.x).toFixed(1)+','+py(p.y).toFixed(1);}).join(' ');
+  aPath+=' L'+px(pts[pts.length-1].x).toFixed(1)+','+py(0).toFixed(1)+' Z';
+  s+='<path d="'+aPath+'" fill="'+c+'" opacity="0.1"/>';
+  var lPath=pts.map(function(p,i){return (i===0?'M':'L')+px(p.x).toFixed(1)+','+py(p.y).toFixed(1);}).join(' ');
+  s+='<path d="'+lPath+'" fill="none" stroke="'+c+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  pts.forEach(function(p){
+    s+='<circle cx="'+px(p.x).toFixed(1)+'" cy="'+py(p.y).toFixed(1)+'" r="4" fill="'+c+'"/>';
+    s+=tx(px(p.x).toFixed(1),pt+ph+15,p.x,10,'#6B635A','middle');
+  });
+  s+='</svg>';return s;
+}
+
+// ── DIVERGING BAR — no click needed ──
+function divBar(entries,W,H,fmt){
+  if(!entries.length)return null;
+  fmt=fmt||function(v){return v.toFixed(2);};
+  var lw=92,pr=48,pt=12,pb=26;
+  var plotW=W-lw-pr,plotH=H-pt-pb;
+  var mv=Math.max.apply(null,entries.map(function(e){return Math.abs(e.v);}),0.1)||1;
+  var mid=lw+plotW/2,step=plotH/(entries.length+1);
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<line x1="'+mid+'" y1="'+pt+'" x2="'+mid+'" y2="'+(pt+plotH)+'" stroke="#C4BCB4" stroke-width="1.5"/>';
+  s+=tx(mid,pt+plotH+15,'← Low · 0 · High →',10,'#9E9690','middle');
+  entries.forEach(function(e,i){
+    var y=pt+step*(i+1);
+    var hw=Math.abs(e.v)/mv*(plotW/2);
+    var pos=e.v>=0,col=pos?GR:RD,rx=pos?mid:mid-hw;
+    s+='<rect x="'+rx.toFixed(1)+'" y="'+(y-8)+'" width="'+hw.toFixed(1)+'" height="16" rx="3" fill="'+col+'" opacity="0.8"/>';
+    s+=tx(lw-7,y,String(e.label||e.k).slice(0,13),11,'#3C3630','end');
+    var tx2=pos?mid+hw+6:mid-hw-6,ta=pos?'start':'end';
+    s+=tx(tx2,y,fmt(e.v),10,col,ta,'700');
+  });
+  s+='</svg>';return s;
+}
+
+// ── STACKED SAT BAR — data-k on each segment rect ──
+function satBar(counts,total,W,H){
+  if(!total)return null;
+  var pl=14,pr=14,pt=32,pb=44;
+  var bH=30,bY=(H-pt-pb)/2-bH/2+pt;
+  var cols=[RD,'#C2783A',AM,AC,GR];
+  var pw=W-pl-pr;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  var cx=pl;
+  [1,2,3,4,5].forEach(function(k,i){
+    var v=counts[k]||0,w=(v/total)*pw;
+    if(w<1){cx+=w;return;}
+    // data-k on rect — sat click
+    s+='<rect x="'+cx.toFixed(1)+'" y="'+bY+'" width="'+w.toFixed(1)+'" height="'+bH+'" fill="'+cols[i]+'" data-k="'+k+'"/>';
+    if(w>28)s+=tx((cx+w/2).toFixed(1),bY+bH/2,v,11,'#fff','middle','700');
+    cx+=w;
+  });
+  var labs=['1 — Very Low','2 — Low','3 — Neutral','4 — Positive','5 — Excellent'];
+  labs.forEach(function(l,i){
+    var lx=pl+i*(pw/5);
+    s+='<rect x="'+lx+'" y="'+(bY+bH+12)+'" width="10" height="10" rx="2" fill="'+cols[i]+'"/>';
+    s+=tx(lx+14,bY+bH+17,l,10,'#6B635A','start');
+  });
+  var neg=((counts[1]||0)+(counts[2]||0))/total*100;
+  var pos=((counts[4]||0)+(counts[5]||0))/total*100;
+  s+=tx(pl,18,neg.toFixed(0)+'% negative',11,RD,'start');
+  s+=tx(W-pr,18,pos.toFixed(0)+'% positive',11,GR,'end');
+  s+='</svg>';return s;
+}
+
+// ═══════════════════════════════════
+// EVENT DELEGATION — clicks on data-k elements anywhere
+// ═══════════════════════════════════
+document.addEventListener('click',function(e){
+  var el=e.target,k=null,cw=null;
+  // Walk up from clicked element to find data-k
+  // Since data-k is ON the actual rect/path/circle, e.target has it directly
+  if(el&&el.getAttribute&&el.getAttribute('data-k')!==null){
+    k=el.getAttribute('data-k');
+  }
+  if(!k)return;
+  // Walk up to find the chart wrapper with data-filter
+  var node=el;
+  while(node&&node!==document.body){
+    if(node.getAttribute&&node.getAttribute('data-filter')){cw=node;break;}
+    node=node.parentElement;
+  }
+  if(!cw)return;
+  var filter=cw.getAttribute('data-filter');
+  var val=(filter==='sat')?parseInt(k,10):k;
+  S[filter]=(S[filter]===val)?null:val;
+  syncSb();
+  refresh();
+});
+
+// ═══════════════════════════════════
+// BUILD ALL 20 CHARTS
+// ═══════════════════════════════════
+function buildAll(a){
+  var R=rows();
+  var W=400,H; // standard width; heights set per chart
+
+  // 1. DEPT — hbar, accent colour, dimmed when filtered
+  H=188;
+  var dE=sortEnt(a.dept).map(function(e){return{k:e.k,label:e.k,v:e.v,c:S.dept&&S.dept!==e.k?'#C4BCB4':AC};});
+  setChart('cw-dept','em-dept',hbar(dE,W,H,S.dept,null,null));
+  document.getElementById('cd-dept').classList.toggle('sel',!!S.dept);
+
+  // 2. STATUS — donut, 3 semantic colours
+  H=188;
+  var stE=sortEnt(a.status).map(function(e){return{k:e.k,label:e.k==='Voluntarily Terminated'?'Vol. Terminated':e.k,v:e.v,c:STAT_C[e.k]||AC};});
+  setChart('cw-status','em-status',donut(stE,W,H,82,85,40,66,S.status));
+  document.getElementById('cd-status').classList.toggle('sel',!!S.status);
+
+  // 3. GENDER — waffle, 2 muted colours
+  setChart('cw-gender','em-gender',waffle(a.sex['F']||0,a.sex['M']||0,S.sex));
+  document.getElementById('cd-gender').classList.toggle('sel',!!S.sex);
+
+  // 4. PERF — hbar, semantic colours
+  H=188;
+  var pORD=['Exceeds','Fully Meets','Needs Improvement','PIP'];
+  var pE=pORD.filter(function(k){return (a.perf[k]||0)>0;}).map(function(k){return{k:k,label:k,v:a.perf[k],c:S.perf&&S.perf!==k?'#C4BCB4':PERF_C[k]};});
+  setChart('cw-perf','em-perf',hbar(pE,W,H,S.perf,null,null));
+  document.getElementById('cd-perf').classList.toggle('sel',!!S.perf);
+
+  // 5. ATTRITION BY DEPT — vbar, semantic colours, avg ref line
+  H=208;
+  var atE=sortEnt(a.attrDept).map(function(e){return{k:e.k,label:e.k.slice(0,9),v:e.v,c:e.v>=35?RD:e.v>=25?AM:GR};});
+  setChart('cw-attrDept','em-attrDept',vbar(atE,W,H,null,function(v){return v+'%';},60,+a.atr));
+
+  // 6. MANAGER ATTRITION — lollipop, semantic colours
+  H=208;
+  var mE=sortEnt(a.mgrAttr,9).map(function(e){return{k:e.k,label:e.k.split(' ').slice(-1)[0],v:e.v,c:S.manager&&S.manager!==e.k?'#C4BCB4':e.v>=50?RD:e.v>=35?AM:GR};});
+  setChart('cw-mgr','em-mgr',lollipop(mE,W,H,S.manager));
+  document.getElementById('cd-mgr').classList.toggle('sel',!!S.manager);
+
+  // 7. TERMINATION REASONS — hbar, red (semantic = leaving)
+  H=208;
+  var tE=sortEnt(a.term,7).map(function(e){return{k:e.k,label:e.k,v:e.v,c:S.termreason&&S.termreason!==e.k?'#C4BCB4':RD};});
+  setChart('cw-term','em-term',hbar(tE,W,H,S.termreason,null,null));
+  document.getElementById('cd-term').classList.toggle('sel',!!S.termreason);
+
+  // 8. SCATTER — accent tonal, 1 colour per dept
+  H=213;
+  var depts=[];R.forEach(function(r){if(depts.indexOf(r.dept)<0)depts.push(r.dept);});
+  var scDs=depts.map(function(d,i){return{label:d,c:TONAL[i%TONAL.length],pts:R.filter(function(r){return r.dept===d&&r.engagement>0;}).map(function(r){return{x:r.salary,y:r.engagement};})};}).filter(function(d){return d.pts.length>0;});
+  setChart('cw-scatter','em-scatter',scatter(scDs,W,H));
+
+  // 9. SALARY BY DEPT — vbar, accent
+  H=213;
+  var sE=sortEnt(a.salDept).filter(function(e){return a.dept[e.k]>1;}).map(function(e){return{k:e.k,label:e.k.slice(0,9),v:e.v,c:AC};});
+  setChart('cw-salDept','em-salDept',vbar(sE,W,H,null,function(v){return '$'+(v/1000).toFixed(0)+'K';},null,null));
+
+  // 10. ENGAGEMENT — dot plot, green/red vs avg
+  H=193;
+  var eE=sortEnt(a.engDept).map(function(e){return{k:e.k,v:e.v};});
+  setChart('cw-eng','em-eng',dotPlot(eE,a.avgEng,W,H));
+
+  // 11. TENURE — hbar, accent
+  H=193;
+  var tenE=sortEnt(a.tenDept).map(function(e){return{k:e.k,label:e.k,v:e.v,c:AC};});
+  setChart('cw-tenure','em-tenure',hbar(tenE,W,H,null,function(v){return v+'y';},12));
+
+  // 12. DAYS LATE — diverging, green/red
+  H=193;
+  var lE=['Exceeds','Fully Meets','Needs Improvement','PIP'].filter(function(k){return a.latePerf[k]!=null;}).map(function(k){return{k:k,label:k,v:a.latePerf[k]};});
+  setChart('cw-late','em-late',divBar(lE,W,H,function(v){return v.toFixed(2)+'d';}));
+
+  // 13. ABSENCES — vbar, semantic + avg line
+  H=193;
+  var abE=sortEnt(a.absDept).map(function(e){return{k:e.k,label:e.k.slice(0,9),v:e.v,c:e.v>=11?RD:e.v>=10?AM:GR};});
+  setChart('cw-abs','em-abs',vbar(abE,W,H,null,function(v){return v.toFixed(1);},15,a.avgAbs));
+
+  // 14. PROJECTS — hbar, amber
+  H=193;
+  var prE=sortEnt(a.projDept).filter(function(e){return e.v>0;}).map(function(e){return{k:e.k,label:e.k,v:e.v,c:AM};});
+  setChart('cw-proj','em-proj',prE.length?hbar(prE,W,H,null,function(v){return v.toFixed(1);},null):null);
+
+  // 15. SOURCE — hbar, accent
+  H=193;
+  var srcE=sortEnt(a.source,8).map(function(e){return{k:e.k,label:e.k,v:e.v,c:S.source&&S.source!==e.k?'#C4BCB4':AC};});
+  setChart('cw-source','em-source',hbar(srcE,W,H,S.source,null,null));
+  document.getElementById('cd-source').classList.toggle('sel',!!S.source);
+
+  // 16. RACE — donut, accent tonal
+  H=193;
+  var rE=sortEnt(a.race).map(function(e,i){return{k:e.k,label:e.k,v:e.v,c:TONAL[i%TONAL.length]};});
+  setChart('cw-race','em-race',donut(rE,W,H,78,80,38,62,S.race));
+  document.getElementById('cd-race').classList.toggle('sel',!!S.race);
+
+  // 17. HIRE TREND — area line, accent
+  H=193;
+  var hE=Object.keys(a.hireYr).filter(function(k){return +k>2005&&+k<2020;}).sort().map(function(k){return{x:+k,y:a.hireYr[k]};});
+  setChart('cw-hire','em-hire',areaLine(hE,W,H,AC));
+
+  // 18. SALARY HISTOGRAM — vbar, accent
+  H=183;
+  var sals=R.map(function(r){return r.salary;});
+  if(sals.length){
+    var mn=Math.min.apply(null,sals),mx=Math.max.apply(null,sals),bins=9;
+    var step=(mx-mn)/bins||5000;
+    var bkts=Array(bins).fill(0);
+    sals.forEach(function(v){var i=Math.min(Math.floor((v-mn)/step),bins-1);bkts[i]++;});
+    var hstE=bkts.map(function(v,i){return{k:i,label:'$'+Math.round((mn+i*step)/1000)+'K',v:v,c:AC};});
+    setChart('cw-salH','em-salH',vbar(hstE,W,H,null,null,null,null));
+  }else setChart('cw-salH','em-salH',null);
+
+  // 19. SATISFACTION — stacked bar, semantic gradient
+  H=183;
+  setChart('cw-sat','em-sat',satBar(a.sat,a.total,W,H));
+  document.getElementById('cd-sat').classList.toggle('sel',S.sat!==null);
+
+  // 20. POSITIONS — hbar, accent
+  H=183;
+  var posE=sortEnt(a.pos,8).map(function(e){return{k:e.k,label:e.k,v:e.v,c:S.position&&S.position!==e.k?'#C4BCB4':AC};});
+  setChart('cw-pos','em-pos',hbar(posE,W,H,S.position,null,null));
+  document.getElementById('cd-pos').classList.toggle('sel',!!S.position);
+}
+
+// ═══════════════════════════════════
+// KPI CARDS
+// ═══════════════════════════════════
+function buildKPIs(a){
+  var f=function(v){return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(1)+'K':String(v);};
+  var kpis=[
+    {i:'👥',v:a.total.toLocaleString(),l:'Total Employees',s:a.active+' currently active'},
+    {i:'✅',v:a.active.toLocaleString(),l:'Active',s:a.total>0?((a.active/a.total*100).toFixed(1)+'% of total'):'—'},
+    {i:'📉',v:a.atr+'%',l:'Attrition Rate',s:a.termd+' terminated'},
+    {i:'💰',v:'$'+f(a.avgSal),l:'Avg Salary',s:'per employee'},
+    {i:'📅',v:a.avgTenure+'y',l:'Avg Tenure',s:'years of service'},
+    {i:'💬',v:a.avgEng,l:'Avg Engagement',s:'out of 5.0'},
+    {i:'😊',v:a.avgSat+'/5',l:'Satisfaction',s:a.avgLate+' avg days late'},
+    {i:'🌍',v:a.div+'%',l:'Diversity',s:'non-white employees'},
+  ];
+  document.getElementById('krow').innerHTML=kpis.map(function(k,i){
+    return '<div class="kpi"><div class="kpi-bar" style="background:'+KBARS[i]+'"></div>'+
+      '<span class="ki">'+k.i+'</span><div class="kv">'+k.v+'</div>'+
+      '<div class="kl">'+k.l+'</div><div class="ks">'+k.s+'</div></div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════
+// INSIGHT + ALERTS + HEADER
+// ═══════════════════════════════════
+function buildInsight(a){
+  var topD=sortEnt(a.dept)[0],topA=sortEnt(a.attrDept)[0];
+  var wM=sortEnt(a.mgrAttr)[0];
+  var topS=Object.keys(a.source).map(function(k){return{k:k,v:a.source[k]};}).sort(function(a,b){return b.v-a.v;})[0];
+  var parts=[
+    {l:'Viewing',v:buildSel()},
+    topD?{l:'Largest Dept',v:'<em>'+topD.k+'</em> — '+topD.v}:null,
+    topA?{l:'Highest Attrition',v:'<em>'+topA.k+'</em> — '+topA.v+'%'}:null,
+    topS?{l:'Top Source',v:'<em>'+topS.k+'</em> — '+topS.v}:null,
+    wM?{l:'Crisis Manager',v:'<em>'+wM.k.split(' ').slice(-1)[0]+'</em> — '+wM.v+'% attr'}:null,
+    {l:'Avg Tenure',v:'<em>'+a.avgTenure+' yrs</em>'},
+  ].filter(Boolean);
+  document.getElementById('ibar').innerHTML=parts.map(function(p){
+    return '<div class="ins"><div class="insl">'+p.l+'</div><div class="insv">'+p.v+'</div></div>';
+  }).join('');
+}
+function buildSel(){
+  var p=[];
+  if(S.name)p.push('"'+S.name+'"');if(S.dept)p.push(S.dept);
+  if(S.status)p.push(S.status.split(' ')[0]);if(S.perf)p.push(S.perf);
+  if(S.sex)p.push(S.sex==='F'?'Female':'Male');if(S.source)p.push(S.source);
+  if(S.race)p.push(S.race.split(' ')[0]);if(S.position)p.push(S.position.slice(0,14));
+  if(S.manager)p.push('Mgr: '+S.manager.split(' ').slice(-1)[0]);
+  if(S.sat!==null)p.push('Sat: '+S.sat);if(S.termreason)p.push(S.termreason.slice(0,12));
+  return p.length?p.map(function(v){return '<em>'+v+'</em>';}).join(' · '):'<em>All 311 employees</em>';
+}
+function buildAlerts(a){
+  var worst=sortEnt(a.mgrAttr).filter(function(e){return e.v>=50;})[0];
+  var cr=document.getElementById('abCr');
+  if(worst&&!S.manager){cr.classList.add('on');document.getElementById('abCrT').textContent='Retention crisis: '+worst.k+' has '+worst.v+'% team attrition';}
+  else cr.classList.remove('on');
+  var fi=document.getElementById('abFi');
+  if(VIS!==null){fi.classList.add('on');document.getElementById('abFiT').textContent='Showing '+a.total.toLocaleString()+' of 311 employees · '+(311-a.total)+' filtered out';}
+  else fi.classList.remove('on');
+  document.getElementById('hTo').textContent=a.total;
+  document.getElementById('hAc').textContent=a.active;
+  document.getElementById('hAt').textContent=a.atr+'%';
+}
+
+// ═══════════════════════════════════
+// TABLE
+// ═══════════════════════════════════
+function buildTbl(){tAll=rows();tShown=50;renderTbl();}
+function renderTbl(){
+  var q=document.getElementById('tSearch').value.toLowerCase();
+  var R=q?tAll.filter(function(r){return r.name.toLowerCase().indexOf(q)>=0;}):tAll.slice();
+  R.sort(function(a,b){
+    var av=a[tSortCol],bv=b[tSortCol];
+    if(typeof av==='number')return tSortAsc?av-bv:bv-av;
+    return tSortAsc?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));
+  });
+  var shown=R.slice(0,tShown);
+  function sb(s){return s==='Active'?'b-act':s==='Voluntarily Terminated'?'b-vol':'b-cau';}
+  function pb(p){return p==='Exceeds'?'b-ex':p==='Fully Meets'?'b-fm':p==='Needs Improvement'?'b-ni':'b-pip';}
+  function sl(s){return s==='Active'?'Active':s==='Voluntarily Terminated'?'Vol. Term':'For Cause';}
+  document.getElementById('tBody').innerHTML=shown.map(function(r){
+    return '<tr><td title="'+r.name+'">'+r.name.slice(0,22)+'</td><td>'+r.dept+'</td>'+
+      '<td title="'+r.position+'">'+r.position.slice(0,22)+'</td>'+
+      '<td><span class="bdg '+sb(r.status)+'">'+sl(r.status)+'</span></td>'+
+      '<td><span class="bdg '+pb(r.perf)+'">'+r.perf+'</span></td>'+
+      '<td>$'+(r.salary/1000).toFixed(0)+'K</td>'+
+      '<td>'+r.engagement.toFixed(1)+'</td><td>'+r.tenure.toFixed(1)+'y</td>'+
+      '<td>'+r.absences+'</td><td title="'+r.manager+'">'+r.manager.split(' ').slice(-1)[0]+'</td></tr>';
+  }).join('');
+  document.getElementById('tCnt').textContent=shown.length+' of '+R.length;
+  document.getElementById('tFoot').textContent=R.length.toLocaleString()+' employee'+(R.length!==1?'s':'')+' match current filters';
+  document.getElementById('tMore').style.display=tShown<R.length?'block':'none';
+}
+window.tSort=function(c){if(tSortCol===c)tSortAsc=!tSortAsc;else{tSortCol=c;tSortAsc=true;}renderTbl();};
+window.tLoadMore=function(){tShown+=50;renderTbl();};
+
+// ═══════════════════════════════════
+// ACTIVE TAGS
+// ═══════════════════════════════════
+function buildTags(){
+  var T=[];
+  function a(l,clr){T.push({l:l,clr:clr});}
+  if(S.name)a('"'+S.name+'"',function(){S.name='';document.getElementById('f-name').value='';});
+  if(S.dept)a('Dept: '+S.dept,function(){S.dept=null;document.getElementById('f-dept').value='';});
+  if(S.status)a(S.status.slice(0,14),function(){S.status=null;document.getElementById('f-status').value='';});
+  if(S.perf)a('Perf: '+S.perf,function(){S.perf=null;document.getElementById('f-perf').value='';});
+  if(S.sex)a(S.sex==='F'?'Female':'Male',function(){S.sex=null;document.getElementById('f-sex').value='';});
+  if(S.source)a(S.source,function(){S.source=null;document.getElementById('f-source').value='';});
+  if(S.race)a(S.race.split(' ')[0],function(){S.race=null;document.getElementById('f-race').value='';});
+  if(S.hispanic)a('Hispanic: '+S.hispanic,function(){S.hispanic=null;document.getElementById('f-hisp').value='';});
+  if(S.marital)a(S.marital,function(){S.marital=null;document.getElementById('f-marital').value='';});
+  if(S.sat!==null)a('Sat: '+S.sat,function(){S.sat=null;});
+  if(S.termreason)a(S.termreason.slice(0,12),function(){S.termreason=null;});
+  if(S.position)a(S.position.slice(0,12),function(){S.position=null;});
+  if(S.manager)a('Mgr: '+S.manager.split(' ').slice(-1)[0],function(){S.manager=null;});
+  if(S.salMin>45000)a('Sal ≥ $'+(S.salMin/1000).toFixed(0)+'K',function(){S.salMin=45000;document.getElementById('sal-mn').value=45000;document.getElementById('smv').textContent='$45K';});
+  if(S.salMax<250000)a('Sal ≤ $'+(S.salMax/1000).toFixed(0)+'K',function(){S.salMax=250000;document.getElementById('sal-mx').value=250000;document.getElementById('sxv').textContent='$250K';});
+  window._T=T;
+  var sec=document.getElementById('atsec'),list=document.getElementById('atgs');
+  if(T.length){
+    sec.style.display='block';
+    list.innerHTML=T.map(function(t,i){return '<span class="atg" onclick="_T['+i+'].clr();syncSb();refresh()">'+t.l+' ×</span>';}).join('');
+  }else sec.style.display='none';
+}
+
+// ═══════════════════════════════════
+// SIDEBAR SYNC
+// ═══════════════════════════════════
+function syncSb(){
+  document.getElementById('f-dept').value=S.dept||'';
+  document.getElementById('f-status').value=S.status||'';
+  document.getElementById('f-perf').value=S.perf||'';
+  document.getElementById('f-sex').value=S.sex||'';
+  document.getElementById('f-source').value=S.source||'';
+  document.getElementById('f-race').value=S.race||'';
+  document.getElementById('f-hisp').value=S.hispanic||'';
+  document.getElementById('f-marital').value=S.marital||'';
+}
+window.sbChange=function(){
+  S.name=document.getElementById('f-name').value.trim();
+  S.dept=document.getElementById('f-dept').value||null;
+  S.status=document.getElementById('f-status').value||null;
+  S.perf=document.getElementById('f-perf').value||null;
+  S.sex=document.getElementById('f-sex').value||null;
+  S.source=document.getElementById('f-source').value||null;
+  S.race=document.getElementById('f-race').value||null;
+  S.hispanic=document.getElementById('f-hisp').value||null;
+  S.marital=document.getElementById('f-marital').value||null;
+  refresh();
+};
+window.salCh=function(w,v){
+  v=+v;
+  if(w==='min'){S.salMin=v;document.getElementById('smv').textContent='$'+(v/1000).toFixed(0)+'K';}
+  else{S.salMax=v;document.getElementById('sxv').textContent='$'+(v/1000).toFixed(0)+'K';}
+  refresh();
+};
+window.doExport=function(){
+  var R=rows(),keys=Object.keys(R[0]);
+  var csv=[keys.join(',')].concat(R.map(function(r){
+    return keys.map(function(k){var v=r[k];return typeof v==='string'&&v.indexOf(',')>=0?'"'+v+'"':v;}).join(',');
+  })).join('\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='hr_export.csv';a.click();
+};
+window.doReset=function(){
+  S={name:'',dept:null,status:null,perf:null,sex:null,source:null,
+     race:null,hispanic:null,marital:null,sat:null,termreason:null,
+     position:null,manager:null,salMin:45000,salMax:250000};
+  syncSb();
+  document.getElementById('f-name').value='';
+  document.getElementById('tSearch').value='';
+  document.getElementById('sal-mn').value=45000;document.getElementById('sal-mx').value=250000;
+  document.getElementById('smv').textContent='$45K';document.getElementById('sxv').textContent='$250K';
+  VIS=null;refresh();
+};
+
+// ═══════════════════════════════════
+// REFRESH + INIT
+// ═══════════════════════════════════
+function refresh(){
+  computeVis();
+  var a=agg();
+  buildKPIs(a);buildInsight(a);buildAlerts(a);buildTags();
+  buildAll(a);buildTbl();
+}
+window.addEventListener('DOMContentLoaded',function(){
+  setTimeout(function(){
+    refresh();
+    var l=document.getElementById('loader');
+    l.style.opacity='0';
+    setTimeout(function(){l.style.display='none';},350);
+  },50);
+});
+</script>
+</body>
+</html>
