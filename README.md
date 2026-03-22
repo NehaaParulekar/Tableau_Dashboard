@@ -1,14 +1,10 @@
 <div align="center">
-<img src="https://img.shields.io/badge/Dashboards-2-1C1917?style=for-the-badge" />
-<br/>
 
 # 📊 Analytics Dashboard Portfolio
 
 **Two fully interactive dashboards — no install, no server, just open in a browser.**
 
 Built by [Neha Parulekar](https://github.com/NehaaParulekar)
-
-<br/>
 </div>
 
 ---
