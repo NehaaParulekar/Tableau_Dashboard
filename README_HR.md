@@ -13,17 +13,6 @@ Click any chart → every other chart, KPI, and the employee table updates insta
 </div>
 
 ---
-
-## Dashboards in this repo
-
-| Dashboard | Description | Link |
-|-----------|-------------|------|
-| **HR Analytics** | 311 employees · 20 charts · cross-filtering | [Open →](https://nehaaparulekar.github.io/Tableau_Dashboard/hr_dashboard.html) |
-| **Netflix Analytics** | 8,807 titles · genre, rating, country analysis | [Open →](https://nehaaparulekar.github.io/Tableau_Dashboard/netflix_dashboard.html) |
-| **Universal Dashboard** | Drop any CSV/JSON — auto-generates charts | [Open →](https://nehaaparulekar.github.io/Tableau_Dashboard/dashboard.html) |
-
----
-
 ## Key HR Metrics
 
 | Metric | Value |
