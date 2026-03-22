@@ -1,8 +1,6 @@
 <div align="center">
-
 <img src="https://img.shields.io/badge/Dashboards-2-1C1917?style=for-the-badge" />
-
-<br/><br/>
+<br/>
 
 # 📊 Analytics Dashboard Portfolio
 
@@ -11,7 +9,6 @@
 Built by [Neha Parulekar](https://github.com/NehaaParulekar)
 
 <br/>
-
 </div>
 
 ---
