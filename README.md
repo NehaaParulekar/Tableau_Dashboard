@@ -1,18 +1,8 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/Dashboards-2-1C1917?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Zero-Dependencies-4338CA?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Open_in-Browser-22A06B?style=for-the-badge" />
-
-<br/><br/>
-
-# 📊 Analytics Dashboard Portfolio
-
-**Two fully interactive dashboards — no install, no server, just open in a browser.**
-
+# 📊Tableau Dashboard Portfolio
+This repository showcases interactive Tableau dashboards focused on extracting business insights from real-world datasets.
 Built by [Neha Parulekar](https://github.com/NehaaParulekar)
-
-<br/>
 
 </div>
 
@@ -24,10 +14,17 @@ Built by [Neha Parulekar](https://github.com/NehaaParulekar)
 |---|-----------|---------|--------|-----------|
 | 1 | **HR Analytics** | HRDataset_v14 · 311 employees | 20 charts | [🚀 Open Dashboard](https://nehaaparulekar.github.io/Tableau_Dashboard/hr_dashboard.html) |
 | 2 | **Netflix Content** | netflix.csv · 8,807 titles | 13 charts | [🚀 Open Dashboard](https://nehaaparulekar.github.io/Tableau_Dashboard/netflix_dashboard.html) |
-
+| 3 | **Reliance industries analysis** | netflix.csv · 8,807 titles | 13 charts | [🚀 Open Dashboard](https://nehaaparulekar.github.io/Tableau_Dashboard/Reliance_dashboard.html) |
 ---
 
 ## 1 · HR Analytics Dashboard
+
+This dashboard analyzes employee data to understand workforce trends and attrition patterns.
+Key Focus Areas:
+Employee attrition
+Department-wise analysis
+Job satisfaction levels
+Salary and experience insights
 
 > **Key finding:** Webster Butler has 61.9% team attrition. Production department at 39.7%. Both flagged automatically.
 
@@ -52,7 +49,23 @@ Built by [Neha Parulekar](https://github.com/NehaaParulekar)
 
 ---
 
+### Business Recommendations:
+
+HR:
+Improve retention strategies for early-career employees
+Focus on increasing job satisfaction through engagement initiatives
+Review compensation structure for high-attrition roles 
+
+---
+
 ## 2 · Netflix Content Analytics Dashboard
+
+Netflix Dashboard Insights
+Movies dominate Netflix content, contributing a higher percentage than TV shows
+Significant increase in content additions observed after 2015
+Drama and International content are among the most popular genres
+United States and India are leading content producers
+Peak content addition observed in recent years, indicating aggressive platform expansion
 
 > **Key finding:** 2019 was Netflix's peak content year. Movies dominate at 69.6% of the catalogue.
 
@@ -71,6 +84,15 @@ Built by [Neha Parulekar](https://github.com/NehaaParulekar)
 | TV Shows | 2,676 (30.4%) |
 | Countries | 127 |
 | Genres | 42 |
+----
+
+### Business Recommendations:
+
+
+Netflix:
+Invest more in high-performing genres like Drama and International content
+Focus on regional content expansion (India, emerging markets)
+Maintain consistent content release strategy 
 
 ---
 
