@@ -14,7 +14,7 @@ Built by [Neha Parulekar](https://github.com/NehaaParulekar)
 |---|-----------|---------|--------|-----------|
 | 1 | **HR Analytics** | HRDataset_v14 · 311 employees | 20 charts | [🚀 Open Dashboard](https://nehaaparulekar.github.io/Tableau_Dashboard/hr_dashboard.html) |
 | 2 | **Netflix Content** | netflix.csv · 8,807 titles | 13 charts | [🚀 Open Dashboard](https://nehaaparulekar.github.io/Tableau_Dashboard/netflix_dashboard.html) |
-| 3 | **Reliance industries analysis** | netflix.csv · 8,807 titles | 13 charts | [🚀 Open Dashboard](https://nehaaparulekar.github.io/Tableau_Dashboard/reliance_dashboard.html) |
+| 3 | **Reliance industries analysis** | Reliance Industries · NSE: RELIANCE · 580 trading days (Jan 2024 – Mar 2026) | 15 charts · Candlestick · RSI · Bollinger Bands · Forecast | [🚀 Open Dashboard](https://nehaaparulekar.github.io/Tableau_Dashboard/reliance_dashboard.html) |
 ---
 
 ## 1 · HR Analytics Dashboard
